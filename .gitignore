@@ -13,3 +13,10 @@ results
 
 node_modules
 npm-debug.log
+
+bin/node
+bin/redis-check-aof
+bin/redis-check-dump
+bin/redis-cli
+bin/redis-server
+
