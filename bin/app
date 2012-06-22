@@ -1,0 +1,35 @@
+#!/bin/bash
+#set -x
+
+APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd));pwd)"
+cd $APP_HOME;
+
+APP_BIN="$APP_HOME/bin"
+APP_PLATFORM="$(uname -s)"
+APP_REALBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
+APP_NODEMODULESBIN="$APP_HOME/node_modules/.bin"
+APP_PATH="$APP_BIN:$APP_NODEMODULESBIN:$PATH"
+APP_ENV="development"
+APP_MAIN="$APP_HOME/index.js"
+
+## We change the PATH to the one defined inside this script. Add all PATHs you need
+## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
+ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME NODE_ENV=$APP_ENV"
+
+## Create symlinks from ./bin/ to the correct binaries of your app
+## Once you called the script, all binaries of the correct platform
+## and bitness are callable in APP_BIN
+if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
+	cd $APP_BIN;
+	if [[ -d "$APP_REALBIN"  && -r "$APP_REALBIN" && "$(ls -A $APP_REALBIN)" ]];then
+		ln -sf $APP_REALBIN/* ./;
+	fi
+  if [[ -d "$APP_NODEMODULESBIN"  && -r "$APP_NODEMODULESBIN" && "$(ls -A $APP_NODEMODULESBIN)" ]];then
+    ln -sf $APP_NODEMODULESBIN/* ./; 
+  fi
+  cd $APP_HOME
+fi;
+
+# Example call of node executable passing all arguments to the APP_MAIN script
+$ENV node $APP_MAIN "$@"
+
