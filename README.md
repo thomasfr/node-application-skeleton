@@ -12,6 +12,12 @@ Besides that it is also possible to set the scripts and config hash in your `pac
 
 When calling `bin/app` the first time it will also create symlinks to the binaries found in bin/{PLATFORM} to bin/ and `node_modules/.bin/` to bin/.
 
+Install Command
+---------------
+
+The Boilerplate app comes with a predefined `install` command. Call it with `bin/app install` or `make install`. It will parse every file in the `conf` directory with `Mustache.js`. It will pass all environment variables as parameters to the config file. Look at `conf/redis.conf` as an example. All files will be backed up with a '.orig' suffix.
+
+
 
 LICENSE
 =======
