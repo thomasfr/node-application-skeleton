@@ -1,29 +1,35 @@
 {
-    "author": "Thomas Fritz <fritztho@gmail.com> (http://fritzthomas.com)",
-    "description": "Boilerplate for standalone self-contained node applications.",
-    "name": "Boilerplate-App",
-    "version": "0.1.0",
-    "homepage": "https://github.com/thomasfr/node-boilerplate-app",
-    "private": true,
-    "scripts": {
-        "test": "bin/app test",
-        "start": "bin/app start",
-        "stop": "bin/app stop"
-    },
-    "config": {
-      "foo": "bar"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/thomasfr/node-boilerplate-app.git"
-    },
-    "dependencies": {
-    },
-    "engines": {
-        "node": "*"
-    },
-    "devDependencies": {
-    },
-    "optionalDependencies": {
-    }
+  "author": "Thomas Fritz <fritztho@gmail.com> (http://fritzthomas.com)",
+  "description": "Boilerplate for standalone self-contained node applications.",
+  "name": "Node Boilerplate App",
+  "version": "0.1.0",
+  "homepage": "https://github.com/thomasfr/node-boilerplate-app",
+  "private": true,
+  "scripts": {
+    "install": "bin/app install",
+    "test": "bin/app test",
+    "start": "bin/app start",
+    "stop": "bin/app stop"
+  },
+  "directories": {
+    "lib": "./lib",
+    "bin": "./bin",
+		"test": "./test",
+    "conf": "./conf"
+  },
+  "config": {
+    "foo": "bar"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thomasfr/node-boilerplate-app.git"
+  },
+  "dependencies": {
+    "mustache": "~0.4.0"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
 }

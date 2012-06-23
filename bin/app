@@ -1,20 +1,22 @@
 #!/bin/bash
 #set -x
 
-APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd));pwd)"
+APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
 cd $APP_HOME;
 
 APP_BIN="$APP_HOME/bin"
+APP_CONF="$APP_HOME/conf"
 APP_PLATFORM="$(uname -s)"
 APP_REALBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
 APP_NODEMODULESBIN="$APP_HOME/node_modules/.bin"
 APP_PATH="$APP_BIN:$APP_NODEMODULESBIN:$PATH"
 APP_ENV="development"
 APP_MAIN="$APP_HOME/index.js"
+APP_INSTALL="$APP_HOME/lib/install.js"
 
 ## We change the PATH to the one defined inside this script. Add all PATHs you need
 ## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
-ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME NODE_ENV=$APP_ENV"
+ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME APP_CONF=$APP_CONF NODE_ENV=$APP_ENV"
 
 ## Create symlinks from ./bin/ to the correct binaries of your app
 ## Once you called the script, all binaries of the correct platform
@@ -30,6 +32,88 @@ if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
   cd $APP_HOME
 fi;
 
-# Example call of node executable passing all arguments to the APP_MAIN script
-$ENV node $APP_MAIN "$@"
+## Display Usage Information 
+usage() {
+	cat << EOF
+usage: $0 command [options]
 
+This is the usage description of your app.
+
+OPTIONS:
+   -h      Show this message
+   -f      Set the FOO Env
+   -v      Verbose
+EOF
+}
+
+## We suppose the first argument is a command 
+## identifier like 'start', 'stop', ...
+COMMAND="$1"
+shift
+
+FOO=
+VERBOSE=
+while getopts “hf:v” OPTION
+do
+	case $OPTION in
+		h)
+			usage
+			exit 1
+			;;
+		f)
+			FOO=$OPTARG
+			;;
+		v)
+			VERBOSE=1
+			;;
+		?)
+			usage
+			exit
+			;;
+	esac
+done
+
+## Check for all your mandatory arguments here.
+## At least a command has to be set so we check that here.
+if [[ -z $COMMAND ]] #|| [[ -z $TEST ]] || [[ -z $SERVER ]] || [[ -z $PASSWD ]]
+then
+	usage
+	exit 1
+fi
+
+## Decide what to do depending on the command:
+
+## 'install' command parses all config files found in 
+## APP_CONF with mustache and passing all ENV vars
+## and arguments to them.
+if [[ $COMMAND = "install" ]]; then
+	$ENV node $APP_INSTALL
+	if [[ $? -gt 0 ]]; then
+		usage
+		exit 1
+	else
+		exit 0
+	fi
+
+## 'foo' command just prints something out
+elif [[ $COMMAND == "foo" ]]; then
+	echo "Foo command"
+	exit 0
+
+## 'usage' shows usage information
+elif [[ $COMMAND == "usage" ]]; then
+	usage
+	exit 1
+
+## Just an example call to APP_MAIN
+else
+	$ENV node $APP_MAIN "$@"
+	if [[ $? -gt 0 ]]; then
+		usage
+		exit 1
+	else
+		exit 0
+	fi
+fi
+
+exit 1
