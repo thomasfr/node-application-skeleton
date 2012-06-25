@@ -5,7 +5,8 @@ APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
 cd $APP_HOME;
 
 APP_BIN="$APP_HOME/bin"
-APP_CONF="$APP_HOME/conf"
+APP_CONF="$APP_HOME/etc"
+APP_TMP="$APP_HOME/tmp"
 APP_PLATFORM="$(uname -s)"
 APP_REALBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
 APP_NODEMODULESBIN="$APP_HOME/node_modules/.bin"
@@ -13,6 +14,8 @@ APP_PATH="$APP_BIN:$APP_NODEMODULESBIN:$PATH"
 APP_ENV="development"
 APP_MAIN="$APP_HOME/index.js"
 APP_INSTALL="$APP_HOME/lib/install.js"
+
+NPM_INSTALL_ENV="npm_config_cache=$APP_TMP/npm npm_config_tmp=$APP_TMP npm_config_prefix=$APP_HOME npm_config_init_module=$APP_HOME/.npm-init.js npm_config_userconfig=$APP_HOME/.npmrc npm_config_globalconfig=$APP_HOME/etc/npmrc npm_config_userignorefile=$APP_HOME/.npmignore npm_config_globalignorefile=$APP_HOME/etc/npmignore npm_config_email=$USER"
 
 ## We change the PATH to the one defined inside this script. Add all PATHs you need
 ## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
@@ -87,6 +90,10 @@ fi
 ## APP_CONF with mustache and passing all ENV vars
 ## and arguments to them.
 if [[ $COMMAND = "install" ]]; then
+	$ENV curl "http://npmjs.org/install.sh" > "$APP_TMP/install.sh"
+	chmod 755 "$APP_TMP/install.sh"
+  $ENV $NPM_INSTALL_ENV "$APP_TMP/install.sh"
+	rm -f "$APP_TMP/install.sh"
 	$ENV node $APP_INSTALL
 	if [[ $? -gt 0 ]]; then
 		usage
