@@ -15,7 +15,7 @@ APP_ENV="development"
 APP_MAIN="$APP_HOME/index.js"
 APP_INSTALL="$APP_HOME/lib/install.js"
 
-NPM_INSTALL_ENV="npm_config_cache=$APP_TMP/npm npm_config_tmp=$APP_TMP npm_config_prefix=$APP_HOME npm_config_init_module=$APP_HOME/.npm-init.js npm_config_userconfig=$APP_HOME/.npmrc npm_config_globalconfig=$APP_HOME/etc/npmrc npm_config_userignorefile=$APP_HOME/.npmignore npm_config_globalignorefile=$APP_HOME/etc/npmignore npm_config_email=$USER"
+NPM_INSTALL_ENV="npm_config_cache=$APP_HOME/.npm npm_config_tmp=$APP_TMP npm_config_prefix=$APP_HOME npm_config_init_module=$APP_HOME/.npm-init.js npm_config_userconfig=$APP_HOME/.npmrc npm_config_globalconfig=$APP_HOME/etc/npmrc npm_config_userignorefile=$APP_HOME/.npmignore npm_config_globalignorefile=$APP_HOME/etc/npmignore"
 
 ## We change the PATH to the one defined inside this script. Add all PATHs you need
 ## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
