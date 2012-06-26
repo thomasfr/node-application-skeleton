@@ -7,6 +7,4 @@
 *.pid
 *.gz
 pid
-log
 npm-debug.log
-.npm
