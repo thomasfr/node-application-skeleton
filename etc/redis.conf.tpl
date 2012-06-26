@@ -12,22 +12,22 @@
 # units are case insensitive so 1GB 1Gb 1gB are all the same.
 # By default Redis does not run as a daemon. Use 'yes' if you need it.
 # Note that Redis will write a pid file in /var/run/redis.pid when daemonized.
-daemonize no
+daemonize yes
 # When running daemonized, Redis writes a pid file in /var/run/redis.pid by
 # default. You can specify a custom pid file location here.
-pidfile /home/thomas/Projekte/Privat/node-boilerplate-app/run/redis.pid
+pidfile {{APP_HOME}}/run/redis.pid
 # Accept connections on the specified port, default is 6379.
 # If port 0 is specified Redis will not listen on a TCP socket.
-port 6379
+port 0
 # If you want you can bind a single interface, if the bind option is not
 # specified all the interfaces will listen for incoming connections.
 #
-# bind 127.0.0.1
+bind 127.0.0.1
 # Specify the path for the unix socket that will be used to listen for
 # incoming connections. There is no default, so Redis will not listen
 # on a unix socket when not specified.
 #
-# unixsocket /tmp/redis.sock
+unixsocket {{APP_HOME}}/tmp/redis.sock
 # unixsocketperm 755
 # Close the connection after a client is idle for N seconds (0 to disable)
 timeout 0
@@ -41,7 +41,7 @@ loglevel notice
 # Specify the log file name. Also 'stdout' can be used to force
 # Redis to log on the standard output. Note that if you use standard
 # output for logging but daemonize, logs will be sent to /dev/null
-logfile stdout
+logfile {{APP_HOME}}/log/redis.log
 # To enable logging to the system logger, just set 'syslog-enabled' to yes,
 # and optionally update the other syslog parameters to suit your needs.
 # syslog-enabled no
@@ -114,7 +114,7 @@ dbfilename dump.rdb
 # Also the Append Only File will be created inside this directory.
 # 
 # Note that you must specify a directory here, not a file name.
-dir /home/thomas/Projekte/Privat/node-boilerplate-app/data/
+dir {{APP_HOME}}/data/
 ################################# REPLICATION #################################
 # Master-Slave replication. Use slaveof to make a Redis instance a copy of
 # another Redis server. Note that the configuration is local to the slave
@@ -462,5 +462,5 @@ client-output-buffer-limit pubsub 32mb 8mb 60
 # to customize a few per-server settings.  Include files can include
 # other files, so use this wisely.
 #
-# include /path/to/local.conf
-# include /path/to/other.conf
+# include {{APP_HOME}}/etc/redis.d/local.conf
+# include {{APP_HOME}}/etc/redis.d/other.conf

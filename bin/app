@@ -15,25 +15,23 @@ APP_ENV="development"
 APP_MAIN="$APP_HOME/index.js"
 APP_INSTALL="$APP_HOME/lib/install.js"
 
-NPM_INSTALL_ENV="npm_config_cache=$APP_HOME/.npm npm_config_tmp=$APP_TMP npm_config_prefix=$APP_HOME npm_config_init_module=$APP_HOME/.npm-init.js npm_config_userconfig=$APP_HOME/.npmrc npm_config_globalconfig=$APP_HOME/etc/npmrc npm_config_userignorefile=$APP_HOME/.npmignore npm_config_globalignorefile=$APP_HOME/etc/npmignore"
-
 ## We change the PATH to the one defined inside this script. Add all PATHs you need
 ## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
-ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME APP_CONF=$APP_CONF NODE_ENV=$APP_ENV"
+ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME APP_CONF=$APP_CONF NODE_ENV=$APP_ENV npm_config_prefix=$APP_HOME npm_config_globalconfig=$APP_CONF/npmrc"
 
 ## Create symlinks from ./bin/ to the correct binaries of your app
 ## Once you called the script, all binaries of the correct platform
 ## and bitness are callable in APP_BIN
-if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
-	cd $APP_BIN;
-	if [[ -d "$APP_REALBIN"  && -r "$APP_REALBIN" && "$(ls -A $APP_REALBIN)" ]];then
-		ln -sf $APP_REALBIN/* ./;
-	fi
-  if [[ -d "$APP_NODEMODULESBIN"  && -r "$APP_NODEMODULESBIN" && "$(ls -A $APP_NODEMODULESBIN)" ]];then
-    ln -sf $APP_NODEMODULESBIN/* ./; 
-  fi
-  cd $APP_HOME
-fi;
+#if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
+#	cd $APP_BIN;
+#	if [[ -d "$APP_REALBIN"  && -r "$APP_REALBIN" && "$(ls -A $APP_REALBIN)" ]];then
+#		ln -sf $APP_REALBIN/* ./;
+#	fi
+#  if [[ -d "$APP_NODEMODULESBIN"  && -r "$APP_NODEMODULESBIN" && "$(ls -A $APP_NODEMODULESBIN)" ]];then
+#    ln -sf $APP_NODEMODULESBIN/* ./; 
+#  fi
+#  cd $APP_HOME
+#fi;
 
 ## Display Usage Information 
 usage() {
@@ -54,27 +52,27 @@ EOF
 COMMAND="$1"
 shift
 
-FOO=
-VERBOSE=
-while getopts “hf:v” OPTION
-do
-	case $OPTION in
-		h)
-			usage
-			exit 1
-			;;
-		f)
-			FOO=$OPTARG
-			;;
-		v)
-			VERBOSE=1
-			;;
-		?)
-			usage
-			exit
-			;;
-	esac
-done
+#FOO=
+#VERBOSE=
+#while getopts “hf:v” OPTION
+#do
+#	case $OPTION in
+#		h)
+#			usage
+#			exit 1
+#			;;
+#		f)
+#			FOO=$OPTARG
+#			;;
+#		v)
+#			VERBOSE=1
+#			;;
+#		?)
+#			usage
+#			exit
+#			;;
+#	esac
+#done
 
 ## Check for all your mandatory arguments here.
 ## At least a command has to be set so we check that here.
@@ -90,33 +88,36 @@ fi
 ## APP_CONF with mustache and passing all ENV vars
 ## and arguments to them.
 if [[ $COMMAND == "install" ]]; then
-	$ENV curl "http://npmjs.org/install.sh" > "$APP_TMP/install.sh"
-	chmod 755 "$APP_TMP/install.sh"
-  $ENV $NPM_INSTALL_ENV "$APP_TMP/install.sh"
-	rm -f "$APP_TMP/install.sh"
-	exit 0
-
-elif [[ $COMMAND == "setup" ]]; then
 	$ENV node $APP_INSTALL
 	exit 0
 
-elif [[ $COMMAND == "npm" ]]; then
-	$ENV $APP_HOME/bin/npm "$@"
-	exit 0
-
 ## 'usage' shows usage information
-elif [[ $COMMAND == "usage" ]]; then
+elif [[ $COMMAND == "usage" ]] || [[ $COMMAND == "help" ]]; then
 	usage
 	exit 1
 
 ## Just an example call to APP_MAIN
-else
+elif [[ $COMMAND == "start" ]]; then
 	$ENV node $APP_MAIN "$@"
 	if [[ $? -gt 0 ]]; then
 		usage
 		exit 1
 	else
 		exit 0
+	fi
+else
+	if [[ -x "$APP_BIN/$COMMAND" ]]; then
+		$ENV $APP_BIN/$COMMAND "$@"
+		exit $?
+	elif [[ -x "$APP_REALBIN/$COMMAND" ]]; then
+		$ENV $APP_REALBIN/$COMMAND "$@"
+		exit $?
+	elif [[ -x "$APP_NODEMODULESBIN/$COMMAND" ]]; then
+		$ENV $APP_NODEMODULESBIN/$COMMAND "$@"
+		exit $?
+	else
+		usage
+		exit 1
 	fi
 fi
 
