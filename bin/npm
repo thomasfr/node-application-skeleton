@@ -1,1 +1,4 @@
-../lib/node_modules/npm/cli.js
+#!/bin/bash
+source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
+
+$ENV node $APP_HOME/lib/node_modules/npm/cli.js "$@"

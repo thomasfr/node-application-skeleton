@@ -1,0 +1,35 @@
+#!/bin/bash
+
+APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
+cd $APP_HOME
+
+APP_CONF="$APP_HOME/configs"
+APP_TMP="$APP_HOME/tmp"
+APP_BIN="$APP_HOME/bin"
+
+APP_PLATFORM="$(uname -s)"
+APP_REALBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
+APP_NODEMODULESBIN="$APP_HOME/node_modules/.bin"
+APP_NPMHOME="$APP_HOME"
+APP_PATH="$APP_BIN:$APP_NODEMODULESBIN:$PATH"
+
+APP_ENV="development"
+APP_MAIN="$APP_HOME/index.js"
+APP_INSTALL="$APP_HOME/lib/install.js"
+
+## We change the PATH to the one defined inside this script. Add all PATHs you need
+## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
+ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME APP_CONF=$APP_CONF NODE_ENV=$APP_ENV npm_config_prefix=$APP_NPMHOME npm_config_globalconfig=$APP_CONF/npmrc"
+
+## Create symlinks from ./bin/ to the correct binaries of your app
+## Once you called the script, all binaries of the correct platform
+## and bitness are callable in APP_BIN
+#if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
+#  cd $APP_BIN;
+#  if [[ -d "$APP_REALBIN"  && -r "$APP_REALBIN" && "$(ls -A $APP_REALBIN)" ]];then
+#    ln -sf $APP_REALBIN/* ./;
+#  fi
+#  cd $APP_HOME
+#fi;
+
+
