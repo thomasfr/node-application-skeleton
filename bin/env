@@ -21,15 +21,4 @@ APP_INSTALL="$APP_HOME/lib/install.js"
 ## We also add a APP_HOME ENV and the more widely use NODE_ENV (expressjs, etc.)
 ENV="/usr/bin/env PATH=$APP_PATH APP_HOME=$APP_HOME APP_CONF=$APP_CONF NODE_ENV=$APP_ENV npm_config_prefix=$APP_NPMHOME npm_config_globalconfig=$APP_CONF/npmrc"
 
-## Create symlinks from ./bin/ to the correct binaries of your app
-## Once you called the script, all binaries of the correct platform
-## and bitness are callable in APP_BIN
-#if [[ -d "$APP_BIN" && -r "$APP_BIN" ]]; then
-#  cd $APP_BIN;
-#  if [[ -d "$APP_REALBIN"  && -r "$APP_REALBIN" && "$(ls -A $APP_REALBIN)" ]];then
-#    ln -sf $APP_REALBIN/* ./;
-#  fi
-#  cd $APP_HOME
-#fi;
-
 
