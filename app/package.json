@@ -1,0 +1,18 @@
+{
+  "author": "Thomas Fritz <fritztho@gmail.com> (http://fritzthomas.com)",
+  "description": "Demo Application",
+  "name": "demo-node-module-which-uses-node-boilerplate-app-woohooo",
+  "version": "0.1.0",
+  "private": true,
+	"main":"index.js",
+  "config": {
+    "foo": "bar"
+  },
+  "dependencies": {
+  },
+  "engines": {
+    "node": "*"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {}
+}

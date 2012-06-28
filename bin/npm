@@ -1,4 +1,4 @@
 #!/bin/bash
-source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
+source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env
 
-$ENV node $APP_HOME/lib/node_modules/npm/cli.js "$@"
+$ENV node $APP_NPMHOME/lib/node_modules/npm/cli.js "$@"

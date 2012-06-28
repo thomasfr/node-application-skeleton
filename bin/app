@@ -1,7 +1,12 @@
 #!/bin/bash
 #set -x
 
-source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
+## We include the global environment.
+## Make your changes in the bin/.env file
+source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env"
+
+## Change CWD to the Apps main root directory
+cd $APP_MAIN
 
 ## Display Usage Information 
 usage() {
@@ -48,16 +53,12 @@ elif [[ $COMMAND == "start" ]]; then
 
 ## Otherwise we search some common known directories within $APP_HOME
 else
-	if [[ -x "$APP_REALBIN/$COMMAND" ]] && [[ -f "$APP_REALBIN/$COMMAND" ]]; then
-		$ENV $APP_REALBIN/$COMMAND "$@"
+	if [[ -x "$APP_PLATFORMBIN/$COMMAND" ]] && [[ -f "$APP_PLATFORMBIN/$COMMAND" ]]; then
+		$ENV $APP_PLATFORMBIN/$COMMAND "$@"
 		exit $?
 
 	elif [[ -x "$APP_NPMHOME/bin/$COMMAND" ]] && [[ -f "$APP_NPMHOME/bin/$COMMAND" ]]; then
 		$ENV $APP_NPMHOME/bin/$COMMAND "$@"
-		exit $?
-
-	elif [[ -x "$APP_NODEMODULESBIN/$COMMAND" ]] && [[ -f "$APP_NODEMODULESBIN/$COMMAND" ]]; then
-		$ENV $APP_NODEMODULESBIN/$COMMAND "$@"
 		exit $?
 
 	else
