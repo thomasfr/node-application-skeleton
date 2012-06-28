@@ -33,7 +33,7 @@ fi
 
 ## Install command
 if [[ $COMMAND == "install" ]]; then
-	$ENV node $APP_INSTALL
+	$ENV node $APP_INSTALL "$@"
 	exit 0
 
 ## 'usage' shows usage information
