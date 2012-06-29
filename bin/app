@@ -6,7 +6,7 @@
 source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env"
 
 ## Change CWD to the Apps main root directory
-cd $APP_MAIN
+cd $APP_HOME
 
 ## Display Usage Information 
 usage() {
@@ -19,30 +19,25 @@ Available Commands:
    start          Start the app
    stop           Stop the app
    install        Initially installs and configures the environment of the app
-   usage|help     Show this messsage
 EOF
 }
 
 COMMAND="$1"
 shift
 
-if [[ -z $COMMAND ]]; then
-	usage
-	exit 1
-fi
-
 ## Install command
 if [[ $COMMAND == "install" ]]; then
 	$ENV node $APP_INSTALL "$@"
-	exit 0
-
-## 'usage' shows usage information
-elif [[ $COMMAND == "usage" ]] || [[ $COMMAND == "help" ]]; then
-	usage
-	exit 1
+	if [[ $? -gt 0 ]]; then
+		usage
+		exit 1
+	else
+		exit 0
+	fi
 
 ## Just an example call to APP_MAIN
 elif [[ $COMMAND == "start" ]]; then
+	cd $APP_MAIN
 	$ENV node $APP_MAIN "$@"
 	if [[ $? -gt 0 ]]; then
 		usage

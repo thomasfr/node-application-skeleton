@@ -15,4 +15,10 @@ process.argv.forEach(function (val, index, array) {
 	console.log(index + ': ' + val);
 });
 
-process.exit(0);
+var http = require('http');
+http.createServer(function(request, response) {
+	response.write("Hello Boilerplate App", 'utf8');
+	console.log("request");
+	response.end();
+}).listen(8000);
+console.log("Listening on http://127.0.0.1:8000 ");
