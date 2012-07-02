@@ -27,7 +27,7 @@ shift
 
 ## Install command
 if [[ $COMMAND == "install" ]]; then
-	$ENV node $APP_INSTALL "$@"
+	$ENV node $APP_LIB $COMMAND "$@"
 	if [[ $? -gt 0 ]]; then
 		usage
 		exit 1
