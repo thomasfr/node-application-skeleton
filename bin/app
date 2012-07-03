@@ -25,29 +25,18 @@ EOF
 COMMAND="$1"
 shift
 
-## Install command
-if [[ $COMMAND == "install" ]]; then
-	$ENV node $APP_LIB $COMMAND "$@"
-	if [[ $? -gt 0 ]]; then
-		usage
-		exit 1
-	else
-		exit 0
-	fi
+if [[ -z $COMMAND ]]; then
+	usage
+	exit 1
+fi
 
-## Just an example call to APP_MAIN
-elif [[ $COMMAND == "start" ]]; then
-	cd $APP_MAIN
-	$ENV node $APP_MAIN "$@"
-	if [[ $? -gt 0 ]]; then
-		usage
-		exit 1
-	else
-		exit 0
-	fi
+## First we try to let our app handle the command
+$ENV node $APP_LIB $COMMAND "$@"
+RET="$?"
 
-## Otherwise we search some common known directories within $APP_HOME
-else
+## If there is no such command, we try to find some known places in our app.
+if [[ $RET -eq 2 ]]; then
+
 	if [[ -x "$APP_PLATFORMBIN/$COMMAND" ]] && [[ -f "$APP_PLATFORMBIN/$COMMAND" ]]; then
 		$ENV $APP_PLATFORMBIN/$COMMAND "$@"
 		exit $?
@@ -55,13 +44,13 @@ else
 	elif [[ -x "$APP_NPMHOME/bin/$COMMAND" ]] && [[ -f "$APP_NPMHOME/bin/$COMMAND" ]]; then
 		$ENV $APP_NPMHOME/bin/$COMMAND "$@"
 		exit $?
-
-	else
-		usage
-		exit 1
 	fi
 
 fi
 
-usage
-exit 1
+echo "RETURN $RET"
+if [[ $RET -gt 0 ]]; then
+	usage
+fi
+
+exit $RET

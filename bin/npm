@@ -2,3 +2,4 @@
 source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env
 cd $APP_LIB
 $ENV node $APP_NPMHOME/lib/node_modules/npm/cli.js "$@"
+exit $?
