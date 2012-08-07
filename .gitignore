@@ -1,4 +1,5 @@
 *.seed
+.idea
 *.npm
 *.log
 *.csv
