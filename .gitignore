@@ -1,11 +1,5 @@
-*.seed
 .idea
-*.npm
 *.log
-*.csv
-*.dat
 *.out
-*.pid
 *.gz
-pid
 npm-debug.log
