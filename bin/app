@@ -48,8 +48,9 @@ if [[ $RET -eq 2 ]]; then
 
 fi
 
-echo "RETURN $RET"
 if [[ $RET -ne 2 && $RET -ne 0 ]]; then
+	echo
+	echo
 	usage
 fi
 

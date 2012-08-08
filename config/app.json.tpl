@@ -1,5 +1,4 @@
 {
     "logfile": "{{{APP_LOG}}}/app.log",
-		"PATH": "foo",
-		"FOOOOOOOOOOOOOO": "BBBBABABABABABABABAARRR"
+    "pidfile": "{{{APP_TMP}}}/app.pid"
 }
