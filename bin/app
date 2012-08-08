@@ -31,18 +31,18 @@ if [[ -z $COMMAND ]]; then
 fi
 
 ## First we try to let our app handle the command
-$ENV node $APP_LIB $COMMAND "$@"
+node $APP_LIB $COMMAND "$@"
 RET="$?"
 
 ## If there is no such command, we try to find some known places in our app.
 if [[ $RET -eq 2 ]]; then
 
 	if [[ -x "$APP_PLATFORMBIN/$COMMAND" ]] && [[ -f "$APP_PLATFORMBIN/$COMMAND" ]]; then
-		$ENV $APP_PLATFORMBIN/$COMMAND "$@"
+		$APP_PLATFORMBIN/$COMMAND "$@"
 		exit $?
 
 	elif [[ -x "$APP_NPMHOME/bin/$COMMAND" ]] && [[ -f "$APP_NPMHOME/bin/$COMMAND" ]]; then
-		$ENV $APP_NPMHOME/bin/$COMMAND "$@"
+		$APP_NPMHOME/bin/$COMMAND "$@"
 		exit $?
 	fi
 
