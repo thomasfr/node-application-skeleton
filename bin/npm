@@ -1,5 +1,7 @@
 #!/bin/bash
-source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env
+source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
+
+## It is important to change the CWD to the Applications lib directory
 cd $APP_LIB
-$ENV node $APP_NPMHOME/lib/node_modules/npm/cli.js "$@"
+$APP_NPMHOME/bin/npm "$@"
 exit $?

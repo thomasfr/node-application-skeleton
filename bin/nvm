@@ -1,0 +1,3 @@
+#!/bin/bash
+source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
+nvm "$@"

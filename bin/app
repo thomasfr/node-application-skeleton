@@ -3,7 +3,7 @@
 
 ## We include the global environment.
 ## Make your changes in the bin/.env file
-source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/.env"
+source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
 
 ## Change CWD to the Apps main root directory
 cd $APP_HOME
@@ -30,22 +30,15 @@ if [[ -z $COMMAND ]]; then
 	exit 1
 fi
 
-## First we try to let our app handle the command
-node $APP_LIB $COMMAND "$@"
+## First we try to run the command
+## with the configured node version
+nvm run default $APP_LIB $COMMAND "$@"
 RET="$?"
 
 ## If there is no such command, we try to find some known places in our app.
 if [[ $RET -eq 2 ]]; then
-
-	if [[ -x "$APP_PLATFORMBIN/$COMMAND" ]] && [[ -f "$APP_PLATFORMBIN/$COMMAND" ]]; then
-		$APP_PLATFORMBIN/$COMMAND "$@"
-		exit $?
-
-	elif [[ -x "$APP_NPMHOME/bin/$COMMAND" ]] && [[ -f "$APP_NPMHOME/bin/$COMMAND" ]]; then
-		$APP_NPMHOME/bin/$COMMAND "$@"
-		exit $?
-	fi
-
+	$COMMAND "$@"
+	exit $?
 fi
 
 if [[ $RET -ne 2 && $RET -ne 0 ]]; then
