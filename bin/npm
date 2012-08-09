@@ -2,6 +2,7 @@
 source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
 
 ## It is important to change the CWD to the Applications lib directory
+## so APP_LIB gets treated as the root dir
 cd $APP_LIB
 $APP_NPMHOME/bin/npm "$@"
 exit $?

@@ -1,9 +1,7 @@
 var fs = require('fs');
 var commandsDir = __dirname + '/commands';
 var util = require('util');
-var Configuration = require('configuration');
-var underscore = require('underscore');
-
+var underscore = require('underscore')
 var commandName = process.argv[2];
 
 try {
@@ -17,11 +15,9 @@ try {
 		appConfig = require(process.env['APP_CONFFILE']);
 	} catch (e) {	}
 
-	var defaultConfigValues = underscore.extend(appConfig, process.env);
-	var config = new Configuration(defaultConfigValues);
+	var config = underscore.extend(appConfig, process.env);
 	var args = process.argv.slice(3) || [];
 	process.exit(command(config, args) || 0);
 } catch(e) {
-	console.error(e);
 	process.exit(2);
 }

@@ -1,3 +1,4 @@
 #!/bin/bash
 source $(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env
 nvm "$@"
+ln -sf $(which node) $APP_BIN/node &> /dev/null

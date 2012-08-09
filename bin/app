@@ -30,19 +30,23 @@ if [[ -z $COMMAND ]]; then
 	exit 1
 fi
 
-## First we try to run the command
-## with the configured node version
-nvm run default $APP_LIB $COMMAND "$@"
+# First we try to run the command
+# with the configured node version
+node $APP_LIB $COMMAND "$@"
 RET="$?"
 
-## If there is no such command, we try to find some known places in our app.
+# If command couldn't be executed 
+# try to execute it so PATH is searched for it.
+# So make sure to populate your PATH properly
+# in bin/env
 if [[ $RET -eq 2 ]]; then
-	$COMMAND "$@"
-	exit $?
+	if [[ -x $COMMAND ]]; then
+		$COMMAND "$@"
+		exit $?
+	fi
 fi
 
 if [[ $RET -ne 2 && $RET -ne 0 ]]; then
-	echo
 	echo
 	usage
 fi

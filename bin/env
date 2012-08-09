@@ -17,14 +17,14 @@ export APP_LIB="$APP_VAR/lib"
 export APP_BIN="$APP_HOME/bin"
 export APP_MAIN="$APP_HOME/app"
 
-export APP_PLATFORM="$(uname -s)"
-export APP_PLATFORMBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
-export APP_NODE="${APP_PLATFORMBIN}/node"
+#export APP_PLATFORM="$(uname -s)"
+#export APP_PLATFORMBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
+#export APP_NODE="${APP_PLATFORMBIN}/node"
 export APP_NPMHOME="$APP_OPT/npm"
 export APP_NVMHOME="$APP_OPT/nvm"
 export APP_ENV="development"
 
-export PATH="$APP_BIN:$APP_PLATFORMBIN:$APP_NPMHOME/bin:$PATH"
+export PATH="$APP_BIN:$APP_NPMHOME/bin:$PATH"
 
 export npm_config_prefix="$APP_NPMHOME"
 export npm_config_globalconfig="$APP_CONF/npmrc"
