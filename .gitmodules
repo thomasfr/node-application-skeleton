@@ -1,0 +1,3 @@
+[submodule "var/opt/nvm"]
+	path = var/opt/nvm
+	url = git://github.com/creationix/nvm.git
