@@ -1,5 +1,2 @@
 .idea
-*.log
-*.out
-*.gz
 npm-debug.log
