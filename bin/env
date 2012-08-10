@@ -4,7 +4,6 @@
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
 ## the correct path gets used.
 export APP_ROOTPATH="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
-APP_SELFNAME="$(basename $0)"
 
 export APP_NAME="Hello Boilerplate"
 export APP_CONFPATH="$APP_ROOTPATH/config"
@@ -17,7 +16,6 @@ export APP_LOGPATH="$APP_VARPATH/log"
 export APP_DATAPATH="$APP_VARPATH/data"
 export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
-APP_SELF="$APP_BINPATH/$APP_SELFNAME"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
 
 export APP_NPMHOME="$APP_OPTPATH/npm"
@@ -41,9 +39,13 @@ export NODE_ENV="$APP_ENV"
 
 export NVM_DIR="$APP_NVMHOME"
 
+APP_SELFNAME="$(basename $0)"
+APP_SELF="$APP_BINPATH/$APP_SELFNAME"
+
 source $NVM_DIR/nvm.sh
 
-app_usage() {
-	echo "$0 [COMMAND]"
-	exit 1
+app_init() {
+	mkdir -p $APP_TMPPATH $APP_RUNPATH $APP_LOGPATH $APP_DATAPATH &> /dev/null
 }
+
+app_init

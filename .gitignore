@@ -1,4 +1,10 @@
 .idea
+config/*
+!config/*.tpl
+var/log/*
+var/tmp/*
+var/run/*
+var/data/*
 bin/nvm
 bin/npm
 bin/node
