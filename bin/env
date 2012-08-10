@@ -1,39 +1,40 @@
 #!/bin/bash
 
 ## Get the absolute directory regardless from where you are calling the script.
-## Make sure to prepend $APP_HOME whenever you can so you are absolutly sure that
+## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
 ## the correct path gets used.
-export APP_HOME="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
+export APP_ROOTPATH="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
+APP_SELFNAME="$(basename $0)"
 
-export APP_CONF="$APP_HOME/config"
-export APP_CONFFILE="$APP_CONF/app.json"
-export APP_VAR="$APP_HOME/var"
-export APP_RUN="$APP_VAR/run"
-export APP_OPT="$APP_VAR/opt"
-export APP_TMP="$APP_VAR/tmp"
-export APP_LOG="$APP_VAR/log"
-export APP_DATA="$APP_VAR/data"
-export APP_LIB="$APP_VAR/lib"
-export APP_BIN="$APP_HOME/bin"
-export APP_MAIN="$APP_HOME/app"
+export APP_NAME="Hello Boilerplate"
+export APP_CONFPATH="$APP_ROOTPATH/config"
+export APP_CONFFILE="$APP_CONFPATH/app.json"
+export APP_VARPATH="$APP_ROOTPATH/var"
+export APP_RUNPATH="$APP_VARPATH/run"
+export APP_OPTPATH="$APP_VARPATH/opt"
+export APP_TMPPATH="$APP_VARPATH/tmp"
+export APP_LOGPATH="$APP_VARPATH/log"
+export APP_DATAPATH="$APP_VARPATH/data"
+export APP_LIBPATH="$APP_VARPATH/lib"
+export APP_BINPATH="$APP_ROOTPATH/bin"
+APP_SELF="$APP_BINPATH/$APP_SELFNAME"
+export APP_HOMEPATH="$APP_ROOTPATH/app"
 
-#export APP_PLATFORM="$(uname -s)"
-#export APP_PLATFORMBIN="$APP_BIN/${APP_PLATFORM}-${HOSTTYPE}"
-#export APP_NODE="${APP_PLATFORMBIN}/node"
-export APP_NPMHOME="$APP_OPT/npm"
-export APP_NVMHOME="$APP_OPT/nvm"
+export APP_NPMHOME="$APP_OPTPATH/npm"
+export APP_NPMHOME_BINPATH="$APP_NPMHOME/bin"
+export APP_NVMHOME="$APP_OPTPATH/nvm"
 export APP_ENV="development"
 
-export PATH="$APP_BIN:$APP_NPMHOME/bin:$PATH"
+export PATH="$APP_NPMHOME_BINPATH:$APP_BINPATH:$PATH"
 
 export npm_config_prefix="$APP_NPMHOME"
-export npm_config_globalconfig="$APP_CONF/npmrc"
-export npm_config_globalignorefile="$APP_CONF/npmignore"
-export npm_config_userignorefile="$APP_MAIN/.npmignore"
-export npm_config_userconfig="$APP_MAIN/.npmrc"
-export npm_config_init_module="$APP_MAIN/.npm-init.js"
+export npm_config_globalconfig="$APP_CONFPATH/npmrc"
+export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
+export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
+export npm_config_userconfig="$APP_HOMEPATH/.npmrc"
+export npm_config_init_module="$APP_HOMEPATH/.npm-init.js"
 export npm_config_cache="$APP_NPMHOME/cache"
-export npm_config_tmp="$APP_TMP"
+export npm_config_tmp="$APP_TMPPATH"
 
 export NODE_PATH="$APP_NPMHOME/lib/node_modules"
 export NODE_ENV="$APP_ENV"
@@ -41,3 +42,8 @@ export NODE_ENV="$APP_ENV"
 export NVM_DIR="$APP_NVMHOME"
 
 source $NVM_DIR/nvm.sh
+
+app_usage() {
+	echo "$0 [COMMAND]"
+	exit 1
+}

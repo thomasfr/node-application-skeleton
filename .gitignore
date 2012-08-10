@@ -1,3 +1,5 @@
 .idea
+bin/nvm
+bin/npm
 bin/node
 npm-debug.log

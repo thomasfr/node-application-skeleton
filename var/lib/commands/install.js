@@ -2,7 +2,7 @@ var fs = require('fs');
 var Mustache = require('mustache');
 
 var installCommand = module.exports = function installCommand (config, args) {
-	var confDir = config['APP_CONF'];
+	var confDir = config['APP_CONFPATH'];
 	var files = fs.readdirSync(confDir);
 
 	if(!files || files.length <= 0) {

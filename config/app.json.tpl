@@ -1,4 +1,4 @@
 {
-    "logfile": "{{{APP_LOG}}}/app.log",
-    "pidfile": "{{{APP_RUN}}}/app.pid"
+    "logfile": "{{{APP_LOGPATH}}}/app.log",
+    "pidfile": "{{{APP_RUNPATH}}}/app.pid"
 }

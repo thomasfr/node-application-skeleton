@@ -1,3 +1,6 @@
 [submodule "var/opt/nvm"]
 	path = var/opt/nvm
 	url = git://github.com/creationix/nvm.git
+[submodule "app"]
+	path = app
+	url = https://github.com/thomasfr/hello-world.git
