@@ -17,35 +17,49 @@ export APP_DATAPATH="$APP_VARPATH/data"
 export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
-
-export APP_NPMHOME="$APP_OPTPATH/npm"
-export APP_NPMHOME_BINPATH="$APP_NPMHOME/bin"
 export APP_NVMHOME="$APP_OPTPATH/nvm"
 export APP_ENV="development"
+export NODE_ENV="$APP_ENV"
 
-export PATH="$APP_NPMHOME_BINPATH:$APP_BINPATH:$PATH"
+APP_WITHNVM="yes"
 
+export APP_NPMHOME="${APP_OPTPATH}/npm"
+export APP_NPMHOME_BINPATH="$APP_NPMHOME/bin"
+export PATH="$APP_BINPATH:$PATH"
+
+if [[ "$APP_WITHNVM" = "yes" ]]; then
+	echo "WITHNVM"
+  export NVM_DIR="$APP_NVMHOME"
+  APP_NVMSOURCEURL="https://raw.github.com/creationix/nvm/master/nvm.sh"
+	APP_NVM_GITURL="git://github.com/creationix/nvm.git"
+  APP_NVMADDITIONALPARAMETERS="--without-npm"
+  source $NVM_DIR/nvm.sh  
+echo "PATH:$PATH"
+echo $NVM_BIN
+fi
+
+export NODE_PATH="$APP_NPMHOME/lib/node_modules"
 export npm_config_prefix="$APP_NPMHOME"
 export npm_config_globalconfig="$APP_CONFPATH/npmrc"
 export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
 export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
-export npm_config_userconfig="$APP_HOMEPATH/.npmrc"
-export npm_config_init_module="$APP_HOMEPATH/.npm-init.js"
+export npm_config_userconfig="$APP_HOMEPATH/npmrc"
+export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
 export npm_config_cache="$APP_NPMHOME/cache"
 export npm_config_tmp="$APP_TMPPATH"
 
-export NODE_PATH="$APP_NPMHOME/lib/node_modules"
-export NODE_ENV="$APP_ENV"
-
-export NVM_DIR="$APP_NVMHOME"
-
 APP_SELFNAME="$(basename $0)"
-APP_SELF="$APP_BINPATH/$APP_SELFNAME"
-
-source $NVM_DIR/nvm.sh
+APP_SELFPATH="$APP_BINPATH/$APP_SELFNAME"
 
 app_init() {
-	mkdir -p $APP_TMPPATH $APP_RUNPATH $APP_LOGPATH $APP_DATAPATH &> /dev/null
+	mkdir -p $APP_TMPPATH $APP_RUNPATH $APP_LOGPATH $APP_DATAPATH $APP_OPTPATH $APP_NPMHOME &> /dev/null
+	cd $APP_BINPATH
+	ln -sf app nvm
+	ln -sf app npm
+	ln -sf app node
+	cd $APP_ROOTPATH
+	if [[ "$APP_WITHNVM" = "yes" ]]; then
+		git submodule add $APP_NVM_GITURL $APP_NVMHOME 
+		git submodule update
+	fi
 }
-
-app_init

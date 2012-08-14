@@ -11,11 +11,22 @@ source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
 ## out of the box on all *nix and Solaris platforms.
 ## If symlinked, we try to execute symlink name as
 ## command and exit
-hasSymlinks=$(file -h $APP_SELF | grep -ic "symbolic link to")
+hasSymlinks=$(file -h $APP_SELFPATH | grep -ic "symbolic link to")
 if [[ $hasSymlinks -gt 0 ]]; then
-	$APP_SELFNAME "$@"
-	exit $?
+	if [[ "$APP_SELFNAME" = "nvm" ]]; then
+		#$APP_SELFNAME "$@" $APP_NVMADDITIONALPARAMETERS
+		$APP_SELFNAME "$@"
+		exit $?
+	else
+		$APP_SELFNAME "$@"
+		exit $?
+	fi
 fi
 
-node $APP_LIBPATH "$@"
-exit $?
+if [[ "$1" = "init" ]]; then
+	app_init
+	exit $?
+else
+	node $APP_LIBPATH "$@"
+	exit $?
+fi
