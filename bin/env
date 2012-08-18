@@ -67,8 +67,8 @@ app_init() {
 			echo
 			mkdir -p $APP_NVM_ROOTPATH
 			curl $APP_NVM_SCRIPTURL -o "$APP_NVM_ROOTPATH/nvm.sh"
-			source "$APP_NVM_ROOTPATH/nvm.sh"	
 		fi
+		source "$APP_NVM_ROOTPATH/nvm.sh"
 	fi
 
 }

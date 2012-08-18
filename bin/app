@@ -1,10 +1,9 @@
 #!/bin/bash
-#set -x
 
 ## We include the global environment.
 ## Make your changes in the bin/.env file
 source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
-
 echo "Using node: '$(which node)'"
+echo
 node $APP_LIBPATH "$@"
 exit $?
