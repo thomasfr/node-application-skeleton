@@ -5,6 +5,7 @@ var/log/*
 var/tmp/*
 var/run/*
 var/data/*
+var/opt/*
 bin/nvm
 bin/npm
 bin/node

@@ -5,28 +5,6 @@
 ## Make your changes in the bin/.env file
 source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
 
-## Find out if called script is symlinked.
-## Call symlink name in this apps enviromment instead
-## We use 'file' and not readlink because it should work
-## out of the box on all *nix and Solaris platforms.
-## If symlinked, we try to execute symlink name as
-## command and exit
-hasSymlinks=$(file -h $APP_SELFPATH | grep -ic "symbolic link to")
-if [[ $hasSymlinks -gt 0 ]]; then
-	if [[ "$APP_SELFNAME" = "nvm" ]]; then
-		#$APP_SELFNAME "$@" $APP_NVMADDITIONALPARAMETERS
-		$APP_SELFNAME "$@"
-		exit $?
-	else
-		$APP_SELFNAME "$@"
-		exit $?
-	fi
-fi
-
-if [[ "$1" = "init" ]]; then
-	app_init
-	exit $?
-else
-	node $APP_LIBPATH "$@"
-	exit $?
-fi
+echo "Using node: '$(which node)'"
+node $APP_LIBPATH "$@"
+exit $?

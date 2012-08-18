@@ -1,11 +1,13 @@
 #!/bin/bash
 
+export APP_NAME="Hello Boilerplate"
+export APP_WITHNVM="yes"
+export NODE_ENV="development"
+
 ## Get the absolute directory regardless from where you are calling the script.
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
 ## the correct path gets used.
 export APP_ROOTPATH="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
-
-export APP_NAME="Hello Boilerplate"
 export APP_CONFPATH="$APP_ROOTPATH/config"
 export APP_CONFFILE="$APP_CONFPATH/app.json"
 export APP_VARPATH="$APP_ROOTPATH/var"
@@ -17,49 +19,60 @@ export APP_DATAPATH="$APP_VARPATH/data"
 export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
-export APP_NVMHOME="$APP_OPTPATH/nvm"
-export APP_ENV="development"
-export NODE_ENV="$APP_ENV"
 
-APP_WITHNVM="yes"
-
-export APP_NPMHOME="${APP_OPTPATH}/npm"
-export APP_NPMHOME_BINPATH="$APP_NPMHOME/bin"
-export PATH="$APP_BINPATH:$PATH"
-
-if [[ "$APP_WITHNVM" = "yes" ]]; then
-	echo "WITHNVM"
-  export NVM_DIR="$APP_NVMHOME"
-  APP_NVMSOURCEURL="https://raw.github.com/creationix/nvm/master/nvm.sh"
-	APP_NVM_GITURL="git://github.com/creationix/nvm.git"
-  APP_NVMADDITIONALPARAMETERS="--without-npm"
-  source $NVM_DIR/nvm.sh  
-echo "PATH:$PATH"
-echo $NVM_BIN
-fi
-
-export NODE_PATH="$APP_NPMHOME/lib/node_modules"
-export npm_config_prefix="$APP_NPMHOME"
+## NPM related stuff
+export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
+export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
+export APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
+export npm_config_prefix="$APP_NPM_ROOTPATH"
 export npm_config_globalconfig="$APP_CONFPATH/npmrc"
 export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
 export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
 export npm_config_userconfig="$APP_HOMEPATH/npmrc"
 export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
-export npm_config_cache="$APP_NPMHOME/cache"
+export npm_config_cache="$APP_NPM_ROOTPATH/cache"
 export npm_config_tmp="$APP_TMPPATH"
 
+## NVM related stuff
+export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
+export APP_NVM_SCRIPTURL="https://raw.github.com/creationix/nvm/master/nvm.sh"
+export NVM_DIR="$APP_NVM_ROOTPATH"
+
+export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
+export PATH="$APP_BINPATH:$APP_NPM_BINPATH:$PATH"
+
 APP_SELFNAME="$(basename $0)"
-APP_SELFPATH="$APP_BINPATH/$APP_SELFNAME"
+APP_SELFPATH="$(which $APP_SELFNAME)"
 
 app_init() {
-	mkdir -p $APP_TMPPATH $APP_RUNPATH $APP_LOGPATH $APP_DATAPATH $APP_OPTPATH $APP_NPMHOME &> /dev/null
-	cd $APP_BINPATH
-	ln -sf app nvm
-	ln -sf app npm
-	ln -sf app node
-	cd $APP_ROOTPATH
-	if [[ "$APP_WITHNVM" = "yes" ]]; then
-		git submodule add $APP_NVM_GITURL $APP_NVMHOME 
-		git submodule update
+	mkdir -p \
+		$APP_TMPPATH \
+		$APP_RUNPATH \
+		$APP_LOGPATH \
+		$APP_DATAPATH \
+		$APP_OPTPATH &> /dev/null
+
+	if [[ ! -d $APP_NPM_ROOTPATH ]]; then
+		echo "* Installing npm"
+		echo
+		mkdir -p $APP_NPM_ROOTPATH
+		curl $APP_NPM_INSTALLSCRIPT -o "$APP_NPM_ROOTPATH/install.sh"
+		chmod +x "$APP_NPM_ROOTPATH/install.sh"
+		$APP_NPM_ROOTPATH/install.sh
 	fi
+
+	if [[ "$APP_WITHNVM" = "yes" ]]; then
+		if [[ ! -d $APP_NVM_ROOTPATH ]]; then
+			echo "* Installing nvm"
+			echo
+			mkdir -p $APP_NVM_ROOTPATH
+			curl $APP_NVM_SCRIPTURL -o "$APP_NVM_ROOTPATH/nvm.sh"
+			source "$APP_NVM_ROOTPATH/nvm.sh"	
+		fi
+	fi
+
 }
+
+app_init
+
+
