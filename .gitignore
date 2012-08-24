@@ -2,11 +2,10 @@
 .DS_Store
 config/*
 !config/*.tpl
-var/log/*
-var/tmp/*
-var/run/*
-var/data/*
-var/opt/*
-bin/node
+var/*
+!var/lib
+bin/*
+!bin/app
+!bin/env
 npm-debug.log
 TODO
