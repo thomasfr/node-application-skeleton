@@ -3,6 +3,8 @@
 export APP_NAME=${APP_NAME:-"Hello Boilerplate"}
 export NODE_ENV=${NODE_ENV:-"development"}
 export APP_NODE_ALIAS=${APP_NODE_ALIAS:-"current"}
+export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"false"}
+export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"false"}
 
 ## Get the absolute directory regardless from where you are calling the script.
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
@@ -20,68 +22,102 @@ export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
 
+
 ## NPM related stuff
-export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
-export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
-export APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
-export npm_config_prefix="$APP_NPM_ROOTPATH"
-export npm_config_globalconfig="$APP_CONFPATH/npmrc"
-export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
-export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
-export npm_config_userconfig="$APP_HOMEPATH/npmrc"
-export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
-export npm_config_cache="$APP_NPM_ROOTPATH/cache"
-export npm_config_tmp="$APP_TMPPATH"
+app_init_npm() {
+    APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
+    export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
+    export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
+    export npm_config_prefix="$APP_NPM_ROOTPATH"
+    export npm_config_globalconfig="$APP_CONFPATH/npmrc"
+    export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
+    export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
+    export npm_config_userconfig="$APP_HOMEPATH/npmrc"
+    export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
+    export npm_config_cache="$APP_NPM_ROOTPATH/cache"
+    export npm_config_tmp="$APP_TMPPATH"
+    export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
+    export PATH="$APP_NPM_BINPATH:$PATH"
+}
 
 ## NVM related stuff
-export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
-APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
-export NVM_DIR="$APP_NVM_ROOTPATH"
+app_init_nvm() {
+    APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
+    export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
+    export NVM_DIR="$APP_NVM_ROOTPATH"
+}
 
-export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
-export PATH="$APP_BINPATH:$APP_NPM_BINPATH:$PATH"
-
-app_init() {
-    mkdir -p \
-        $APP_TMPPATH \
-        $APP_RUNPATH \
-        $APP_LOGPATH \
-        $APP_DATAPATH \
-        $APP_OPTPATH &> /dev/null
-
-    if [[ ! -d $APP_NPM_ROOTPATH ]]; then
-        echo "* Installing npm"
-        echo
-        mkdir -p $APP_NPM_ROOTPATH
-        curl $APP_NPM_INSTALLSCRIPT -o "$APP_NPM_ROOTPATH/install.sh"
-        chmod +x "$APP_NPM_ROOTPATH/install.sh"
-        $APP_NPM_ROOTPATH/install.sh
-        echo
-        echo "* npm install complete"
+app_setup_nvm() {
+    if [[ ! $(type -P git) ]]; then
+        echo "[ERROR] GIT is needed.";
+        exit 1
     fi
 
     if [[ ! -d $APP_NVM_ROOTPATH ]]; then
-        echo "* Installing nvm"
-        git submodule add $APP_NVM_GITURL $APP_NVM_ROOTPATH
-        echo "* nvm install complete"
+        echo "cloning nvm."
+        git clone $APP_NVM_GITURL $APP_NVM_ROOTPATH
+        echo "nvm clone complete."
     fi
 
-    CURRENT_NODE="$($APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS)"
-    echo "CURRENTNODE $CURRENT_NODE"
+    $APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS &> /dev/null
     if [[ $? -eq 0 ]]; then
         cd $APP_BINPATH
-        ln -sf $CURRENT_NODE "node"
+        ln -sf "$($APP_NVM_ROOTPATH/nvm which)" "node"
         cd $APP_ROOTPATH
     fi
+}
 
-    CURRENT_NODE="$(which node)"
+app_setup_npm() {
+    if [[ ! -d $APP_NPM_ROOTPATH ]]; then
+        if [[ ! $(type -P node) ]]; then
+            echo "[ERROR] 'node' currently not installed. Please install."
+            exit 1
+        fi
+        echo "Installing npm."
+        mkdir -p $APP_NPM_ROOTPATH
+        curl $APP_NPM_INSTALLSCRIPT -o "$APP_NPM_ROOTPATH/install.sh"
+        chmod +x "$APP_NPM_ROOTPATH/install.sh"
+        cd $APP_NPM_ROOTPATH
+        $APP_NPM_ROOTPATH/install.sh
+        cd $APP_ROOTPATH
+        echo "npm install complete."
+    fi
+}
 
-    if [ "${CURRENT_NODE##$APP_ROOTPATH}" = "$CURRENT_NODE" ]; then
-          echo "[WARN] Used node '$CURRENT_NODE' not within '$APP_ROOTPATH'"
+app_setup() {
+    mkdir -p \
+    $APP_TMPPATH \
+    $APP_RUNPATH \
+    $APP_LOGPATH \
+    $APP_DATAPATH \
+    $APP_OPTPATH &> /dev/null
+
+    if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
+        app_setup_nvm
     fi
 
-    unset CURRENT_NODE
+    if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
+        app_setup_npm
+    fi
 }
+
+app_init() {
+    if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
+        app_init_nvm
+    fi
+    
+    if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
+        app_init_npm
+    fi
+
+    ## Setup
+    app_setup
+
+    export PATH="$APP_BINPATH:$PATH"
+    export APP_CURRENT_NODE="$(type -P node)"
+}
+
 app_init
+
 
 

@@ -1,8 +1,13 @@
 #!/bin/bash
-
-## We include the global environment.
 source "$(cd $(dirname $0);pwd -P)/env"
-echo "Using node: '$(which node)'"
+if [[ ! $(type -P node) ]]; then
+    echo "[ERROR] 'node' currently not installed. Please install."
+    exit 1
+fi
+if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
+    echo "[INFO] node found. But '$APP_CURRENT_NODE' not within '$APP_ROOTPATH'"
+fi
+echo "[INFO] Using node: '$(which node)'"
 echo
 node $APP_LIBPATH "$@"
 exit $?
