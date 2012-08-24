@@ -1,13 +1,38 @@
 #!/bin/bash
 source "$(cd $(dirname $0);pwd -P)/env"
+
+export PATH="$APP_BINPATH:$PATH"
+export APP_CURRENT_NODE="$(type -P node)"
+if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
+    echo "[INFO] node found, but '$APP_CURRENT_NODE' is not"
+    echo "       within apps root path '$APP_ROOTPATH'"
+fi
+
+hasSymlinks=$(file -h $0 | grep -ic "symbolic link to")
+if [[ $hasSymlinks -gt 0 ]]; then
+    COMMAND=$(basename $0)
+    case $COMMAND in
+        "nvm" )
+            $APP_NVM_ROOTPATH/nvm "$@"
+            exit $?
+        ;;
+        "npm" )
+            $APP_NPM_BINPATH/npm "$@"
+            exit $?
+        ;;
+        * )
+            $COMMAND "$@"
+            exit $?
+        ;;
+    esac
+fi
+
 if [[ ! $(type -P node) ]]; then
-    echo "[ERROR] 'node' currently not installed. Please install."
+    echo "[ERROR] 'node' currently not installed. Please install and try again ;)"
     exit 1
 fi
-if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
-    echo "[INFO] node found. But '$APP_CURRENT_NODE' not within '$APP_ROOTPATH'"
-fi
-echo "[INFO] Using node: '$(which node)'"
+
+echo "[INFO] Using '$(type -P node)'"
 echo
 node $APP_LIBPATH "$@"
 exit $?

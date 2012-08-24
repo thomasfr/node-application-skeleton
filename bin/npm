@@ -1,6 +1,0 @@
-#!/bin/bash
-source "$(cd $(dirname $0);pwd -P)/env"
-echo "Using node: '$(which node)'"
-echo
-$APP_NPM_BINPATH/npm "$@"
-exit $?

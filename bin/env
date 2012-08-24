@@ -3,8 +3,8 @@
 export APP_NAME=${APP_NAME:-"Hello Boilerplate"}
 export NODE_ENV=${NODE_ENV:-"development"}
 export APP_NODE_ALIAS=${APP_NODE_ALIAS:-"current"}
-export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"false"}
-export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"false"}
+export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"true"}
+export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"true"}
 
 ## Get the absolute directory regardless from where you are calling the script.
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
@@ -21,7 +21,6 @@ export APP_DATAPATH="$APP_VARPATH/data"
 export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
-
 
 ## NPM related stuff
 app_init_npm() {
@@ -43,6 +42,7 @@ app_init_npm() {
 ## NVM related stuff
 app_init_nvm() {
     APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
+    APP_NVM_ADDITIONALPARAMETERS="--without-npm"
     export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
     export NVM_DIR="$APP_NVM_ROOTPATH"
 }
@@ -56,6 +56,9 @@ app_setup_nvm() {
     if [[ ! -d $APP_NVM_ROOTPATH ]]; then
         echo "cloning nvm."
         git clone $APP_NVM_GITURL $APP_NVM_ROOTPATH
+        cd $APP_BINPATH
+        ln -sf "app" "nvm"
+        cd $APP_ROOTPATH
         echo "nvm clone complete."
     fi
 
@@ -79,6 +82,8 @@ app_setup_npm() {
         chmod +x "$APP_NPM_ROOTPATH/install.sh"
         cd $APP_NPM_ROOTPATH
         $APP_NPM_ROOTPATH/install.sh
+        cd $APP_BINPATH
+        ln -sf "app" "npm"
         cd $APP_ROOTPATH
         echo "npm install complete."
     fi
@@ -91,11 +96,9 @@ app_setup() {
     $APP_LOGPATH \
     $APP_DATAPATH \
     $APP_OPTPATH &> /dev/null
-
     if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
         app_setup_nvm
     fi
-
     if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
         app_setup_npm
     fi
@@ -109,12 +112,7 @@ app_init() {
     if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
         app_init_npm
     fi
-
-    ## Setup
     app_setup
-
-    export PATH="$APP_BINPATH:$PATH"
-    export APP_CURRENT_NODE="$(type -P node)"
 }
 
 app_init
