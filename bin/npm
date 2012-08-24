@@ -1,7 +1,6 @@
 #!/bin/bash
-
-source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
-echo "Using node:'$(which node)'"
+source "$(cd $(dirname $0);pwd -P)/env"
+echo "Using node: '$(which node)'"
 echo
-$APP_NPM_ROOTPATH/bin/npm "$@"
+$APP_NPM_BINPATH/npm "$@"
 exit $?

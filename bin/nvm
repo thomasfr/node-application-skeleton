@@ -1,7 +1,4 @@
 #!/bin/bash
-source "$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)/bin/env"
-source "$APP_NVM_ROOTPATH/nvm.sh"
-nvm "$@"
-nvm use default
-
+source "$(cd $(dirname $0);pwd -P)/env"
+$APP_NVM_ROOTPATH/nvm "$@"
 exit $?

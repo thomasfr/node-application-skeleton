@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 config/*
 !config/*.tpl
 var/log/*
@@ -6,4 +7,6 @@ var/tmp/*
 var/run/*
 var/data/*
 var/opt/*
+bin/node
 npm-debug.log
+TODO
