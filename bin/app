@@ -1,38 +1,26 @@
 #!/bin/bash
 source "$(cd $(dirname $0);pwd -P)/env"
 
-export PATH="$APP_BINPATH:$PATH"
-export APP_CURRENT_NODE="$(type -P node)"
-if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
-    echo "[INFO] node found, but '$APP_CURRENT_NODE' is not"
-    echo "       within apps root path '$APP_ROOTPATH'"
-fi
-
 hasSymlinks=$(file -h $0 | grep -ic "symbolic link to")
 if [[ $hasSymlinks -gt 0 ]]; then
     COMMAND=$(basename $0)
-    case $COMMAND in
-        "nvm" )
-            $APP_NVM_ROOTPATH/nvm "$@"
-            exit $?
-        ;;
-        "npm" )
-            $APP_NPM_BINPATH/npm "$@"
-            exit $?
-        ;;
-        * )
-            $COMMAND "$@"
-            exit $?
-        ;;
-    esac
+else
+    COMMAND="node"
 fi
 
-if [[ ! $(type -P node) ]]; then
-    echo "[ERROR] 'node' currently not installed. Please install and try again ;)"
-    exit 1
-fi
-
-echo "[INFO] Using '$(type -P node)'"
-echo
-node $APP_LIBPATH "$@"
-exit $?
+case $COMMAND in
+    "node" )
+        app_check_node_setup
+        node $APP_LIBPATH "$@"
+        exit $?
+    ;;
+    "npm" )
+        app_check_node_setup
+        $APP_NPM_BINPATH/npm "$@"
+        exit $?
+    ;;
+    "nvm" )
+        $APP_NVM_BINPATH/nvm "$@"
+        exit $?
+    ;;
+esac

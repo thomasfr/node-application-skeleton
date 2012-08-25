@@ -22,6 +22,23 @@ export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
 
+app_check_node_setup() {
+    if [[ ! $(type -P node) ]]; then
+        echo "[ERROR] 'node' currently not installed. Please install and try again ;)"
+        exit 1
+    fi
+    app_check_if_local_node
+    echo "[INFO] Using '$(type -P node)'"
+}
+
+app_check_if_local_node() {
+    export APP_CURRENT_NODE="$(type -P node)"
+    if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
+        echo "[INFO] node found, but '$APP_CURRENT_NODE' is not"
+        echo "       within apps root path '$APP_ROOTPATH'"
+    fi
+}
+
 ## NPM related stuff
 app_init_npm() {
     APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
@@ -45,6 +62,8 @@ app_init_nvm() {
     APP_NVM_ADDITIONALPARAMETERS="--without-npm"
     export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
     export NVM_DIR="$APP_NVM_ROOTPATH"
+    export APP_NVM_BINPATH="$APP_NVM_ROOTPATH"
+    export PATH="$APP_NVM_BINPATH:$PATH"
 }
 
 app_setup_nvm() {
@@ -113,6 +132,7 @@ app_init() {
         app_init_npm
     fi
     app_setup
+    export PATH="$APP_BINPATH:$PATH"
 }
 
 app_init
