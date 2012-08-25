@@ -133,6 +133,7 @@ app_init() {
     fi
     app_setup
     export PATH="$APP_BINPATH:$PATH"
+    export NODE_PATH="$APP_LIBPATH/commands:$NODE_PATH"
 }
 
 app_init

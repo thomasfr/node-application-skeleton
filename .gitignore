@@ -1,7 +1,7 @@
 .idea
 .DS_Store
 config/*
-!config/*.tpl
+!config/tpl.*
 var/*
 !var/lib
 bin/*

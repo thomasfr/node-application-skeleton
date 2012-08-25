@@ -1,0 +1,6 @@
+{
+    "logfile": "/Users/thomas/Projekte/node-application-skeleton/var/log/app.log",
+    "pidfile": "/Users/thomas/Projekte/node-application-skeleton/var/run/app.pid",
+    "foo": "${BAR}/app.pid",
+    "foo": "foo/app.pid"
+}
