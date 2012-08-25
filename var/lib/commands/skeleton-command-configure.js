@@ -12,6 +12,7 @@ var configure = module.exports = function (config, args) {
     var fileContents;
     var fileOutput;
     var configHash = {};
+    var filePatternRegex = /\.tpl$/;
     var confFileName;
     var newConfFileName;
 
@@ -23,9 +24,10 @@ var configure = module.exports = function (config, args) {
     }
 
     files.forEach(function (file) {
-        if (file.search(/^tpl\..*/) >= 0) {
+        console.log(file.match(filePatternRegex));
+        if (file.search(filePatternRegex) >= 0) {
             confFileName    = confDir + '/' + file;
-            newConfFileName = confFileName.replace(/\.tpl$/, '');
+            newConfFileName = confFileName.replace(filePatternRegex, "");
             console.log("Preparing config file ('" + newConfFileName + "')");
             fileContents    = fs.readFileSync(confFileName, 'utf8');
             fileOutput      = simpleReplace(fileContents, configHash);
