@@ -28,13 +28,12 @@ app_check_node_setup() {
         exit 1
     fi
     app_check_if_local_node
-    echo "[INFO] Using '$(type -P node)'"
 }
 
 app_check_if_local_node() {
     export APP_CURRENT_NODE="$(type -P node)"
     if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
-        echo "[INFO] node found, but '$APP_CURRENT_NODE' is not"
+        echo "[WARN] node found, but '$APP_CURRENT_NODE' is not"
         echo "       within apps root path '$APP_ROOTPATH'"
     fi
 }
@@ -73,12 +72,11 @@ app_setup_nvm() {
     fi
 
     if [[ ! -d $APP_NVM_ROOTPATH ]]; then
-        echo "cloning nvm."
+        echo "Installing NVM locally."
         git clone $APP_NVM_GITURL $APP_NVM_ROOTPATH
         cd $APP_BINPATH
         ln -sf "app" "nvm"
         cd $APP_ROOTPATH
-        echo "nvm clone complete."
     fi
 
     $APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS &> /dev/null
@@ -95,7 +93,7 @@ app_setup_npm() {
             echo "[ERROR] 'node' currently not installed. Please install."
             exit 1
         fi
-        echo "Installing npm."
+        echo "Installing NPM locally."
         mkdir -p $APP_NPM_ROOTPATH
         curl $APP_NPM_INSTALLSCRIPT -o "$APP_NPM_ROOTPATH/install.sh"
         chmod +x "$APP_NPM_ROOTPATH/install.sh"
@@ -104,7 +102,6 @@ app_setup_npm() {
         cd $APP_BINPATH
         ln -sf "app" "npm"
         cd $APP_ROOTPATH
-        echo "npm install complete."
     fi
 }
 
@@ -133,7 +130,6 @@ app_init() {
     fi
     app_setup
     export PATH="$APP_BINPATH:$PATH"
-    export NODE_PATH="$APP_LIBPATH/commands:$NODE_PATH"
 }
 
 app_init

@@ -1,14 +1,14 @@
 {
   "name": "hello-world",
   "version": "0.0.1",
-  "description": "",
+  "description": "Hello World sample application",
   "main": "index.js",
   "dependencies": {
     "express": "~3.0.0rc3"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "repository": "",
   "author": "Thomas Fritz",

@@ -15,14 +15,19 @@ try {
     appConfig = require(process.env['APP_CONFFILE']) || {};
 } catch (e) {}
 
+var commandsDir = __dirname + '/commands/';
 var config = underscore.extend(appConfig, process.env);
 var args = process.argv.slice(3) || [];
 
-if(commandName !== 'configure') {
-    require('skeleton-command-configure')(config, args);
-}
+// if(commandName !== 'configure') {
+//     require(commandsDir + 'skeleton-command-configure.js')(config, args);
+// }
 
 var commandFile = 'skeleton-command-' + commandName;
-var command = require(commandFile);
-
-process.exit(command(config, args) || 0);
+try {
+    var command = require(commandsDir + commandFile + '.js');
+} catch (e) {
+    console.error("Command '"+commandName+"' not found or failed to load.");
+    throw e;
+}
+command(config, args);

@@ -5,27 +5,29 @@ var spawn = require('child_process').spawn;
 module.exports = function startCommand(config, args) {
     if (fs.existsSync(config['pidfile'])) {
         console.log("PID file exists ('" + config['pidfile'] + "')\nMaybe '" + config['APP_NAME'] + "' already running!?");
-        return 1;
+        return false;
     }
-    process.stdout.write("Starting " + config['APP_NAME']);
 
-    // It seems that we can use the same stream object for stdin and stdout. NOOO we can not!!
-    // We have to create a second Stream to the same file, otherwise we will not get any
-    // errors in the logfile and no error that it could not be written because the child is
-    // detached from the parents. Yay.
-    var out = fs.openSync(config['logfile'], 'a');
-    var err = fs.openSync(config['logfile'], 'a');
+    var cleanupOnExit = function () {
+        if (fs.existsSync(config['pidfile'])) {
+            console.log("\nRemoving PID file ('" + config['pidfile'] + "')");
+            fs.unlinkSync(config['pidfile']);
+        }
+    };
 
-    // Prepend the path to the actual path to the given arguments
-    args.unshift(config['APP_HOMEPATH']);
-    var child = spawn('node', args, {
-        detached: true,
-        stdio: ['ignore', out, err],
-        cwd: config['APP_HOMEPATH']
+    var child;
+    args.unshift('start');
+    child = spawn('npm', args, {
+        stdio: ['ignore', process.stdout, process.stderr],
+        cwd: config['APP_HOMEPATH'],
+        env: process.env
     });
-    child.unref();
+    process.stdout.write("Started " + config['APP_NAME'] + " (pid: '" + child.pid + "')\n");
+
+    process.on('SIGINT', cleanupOnExit);
+    process.on('SIGQUIT', cleanupOnExit);
+    process.on('SIGKILL', cleanupOnExit);
 
     fs.writeFileSync(config['pidfile'], child.pid);
-    process.stdout.write(" (pid: '" + child.pid + "') [ OK ]\n");
-    return 0;
+    return true;
 }

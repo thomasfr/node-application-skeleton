@@ -16,7 +16,6 @@ case $COMMAND in
     ;;
     "npm" )
         app_check_node_setup
-        node $APP_LIBPATH configure
         $APP_NPM_BINPATH/npm "$@"
         exit $?
     ;;
