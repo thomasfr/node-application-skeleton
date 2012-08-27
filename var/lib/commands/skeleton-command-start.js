@@ -16,8 +16,9 @@ module.exports = function startCommand(config, args) {
     };
 
     var child;
-    args.unshift('start');
-    child = spawn('npm', args, {
+    //args.unshift('start');
+    args.unshift(config['APP_HOMEPATH']);
+    child = spawn('node', args, {
         stdio: ['ignore', process.stdout, process.stderr],
         cwd: config['APP_HOMEPATH'],
         env: process.env

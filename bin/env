@@ -136,6 +136,7 @@ app_init() {
         app_init_npm
     fi
     export PATH="$APP_BINPATH:$PATH"
+		app_setup
 }
 
 app_init

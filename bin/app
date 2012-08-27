@@ -3,16 +3,10 @@ source "$(cd $(dirname $0);pwd -P)/env"
 hasSymlinks=$(file -h $0 | grep -ic "symbolic link to")
 if [[ $hasSymlinks -gt 0 ]]; then
     COMMAND=$(basename $0)
-elif [[ $# -gt 0 ]]; then
-		COMMAND=$1
 else
     COMMAND="node"
 fi
 case $COMMAND in
-    "setup" )
-        app_setup
-        exit $?
-    ;;
     "node" )
         app_check_node_setup
         node $APP_LIBPATH "$@"
