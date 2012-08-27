@@ -22,6 +22,17 @@ export APP_LIBPATH="$APP_VARPATH/lib"
 export APP_BINPATH="$APP_ROOTPATH/bin"
 export APP_HOMEPATH="$APP_ROOTPATH/app"
 
+## Thanks to https://github.com/visionmedia/n/blob/master/bin/n#L35-45
+GET=
+
+# wget support (Added --no-check-certificate for Github downloads)
+which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
+
+# curl support
+which curl > /dev/null && GET="curl --insecure -# -L"
+
+
+
 app_check_node_setup() {
     if [[ ! $(type -P node) ]]; then
         echo "[ERROR] 'node' currently not installed. Please install and try again ;)"
@@ -58,6 +69,7 @@ app_init_npm() {
 ## NVM related stuff
 app_init_nvm() {
     APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
+    APP_NVM_ARCHIVEURL="https://github.com/thomasfr/nvm/tarball/master"
     APP_NVM_ADDITIONALPARAMETERS="--without-npm"
     export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
     export NVM_DIR="$APP_NVM_ROOTPATH"
@@ -66,14 +78,9 @@ app_init_nvm() {
 }
 
 app_setup_nvm() {
-    if [[ ! $(type -P git) ]]; then
-        echo "[ERROR] GIT is needed.";
-        exit 1
-    fi
-
     if [[ ! -d $APP_NVM_ROOTPATH ]]; then
         echo "Installing NVM locally."
-        git clone $APP_NVM_GITURL $APP_NVM_ROOTPATH
+        mkdir -p $APP_NVM_ROOTPATH && cd $APP_NVM_ROOTPATH && $GET $APP_NVM_ARCHIVEURL | tar xz --strip-components=1 
         cd $APP_BINPATH
         ln -sf "app" "nvm"
         cd $APP_ROOTPATH
@@ -95,7 +102,7 @@ app_setup_npm() {
         fi
         echo "Installing NPM locally."
         mkdir -p $APP_NPM_ROOTPATH
-        curl $APP_NPM_INSTALLSCRIPT -o "$APP_NPM_ROOTPATH/install.sh"
+        $GET $APP_NPM_INSTALLSCRIPT > "$APP_NPM_ROOTPATH/install.sh"
         chmod +x "$APP_NPM_ROOTPATH/install.sh"
         cd $APP_NPM_ROOTPATH
         $APP_NPM_ROOTPATH/install.sh
@@ -128,7 +135,6 @@ app_init() {
     if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
         app_init_npm
     fi
-    app_setup
     export PATH="$APP_BINPATH:$PATH"
 }
 
