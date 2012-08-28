@@ -1,5 +1,6 @@
 #!/bin/bash
 source "$(cd $(dirname $0);pwd -P)/env"
+echo $APP_HOSTSYSTEM
 hasSymlinks=$(file -h $0 | grep -ic "symbolic link to")
 if [[ $hasSymlinks -gt 0 ]]; then
     COMMAND=$(basename $0)

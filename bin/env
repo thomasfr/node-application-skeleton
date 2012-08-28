@@ -1,14 +1,14 @@
 #!/bin/bash
 
-export APP_NAME=${APP_NAME:-"Hello Boilerplate"}
+export APP_NAME=${APP_NAME:-"Hello Skeleton"}
 export NODE_ENV=${NODE_ENV:-"development"}
 export APP_NODE_ALIAS=${APP_NODE_ALIAS:-"current"}
-export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"true"}
-export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"true"}
+export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"false"}
+export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"false"}
 
 ## Get the absolute directory regardless from where you are calling the script.
-## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure that
-## the correct path gets used.
+## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure
+## that the correct path gets used.
 export APP_ROOTPATH="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
 export APP_CONFPATH="$APP_ROOTPATH/config"
 export APP_CONFFILE="$APP_CONFPATH/app.json"
@@ -29,114 +29,136 @@ GET=
 which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
 
 # curl support
-which curl > /dev/null && GET="curl --insecure -# -L"
+which curl > /dev/null && GET="curl --insecure -# -sSL"
+
+
+# node-v0.8.8-darwin-x64.tar.gz
+APP_HOSTSYSTEM="$(uname -s | tr ['A-Z'] ['a-z'])"
+APP_HOSTMACHINE="$(uname -m)"
+if [[ "$APP_HOSTMACHINE" == 'x86_64' ]]; then
+  APP_HOSTBITNESS="x86"
+else
+  APP_HOSTBITNESS="x64"
+fi
+APP_NODEVERSION="v0.8.8"
+
+APP_NODE_FULLNAME="node-${APP_NODEVERSION}-${APP_HOSTSYSTEM}-${APP_HOSTBITNESS}"
+APP_NODE_PACKAGENAME="${APP_NODE_FULLNAME}.tar.gz"
+APP_NODE_PACKAGEURL="http://nodejs.org/dist/${APP_NODEVERSION}/$APP_NODE_PACKAGENAME"
+
+#mkdir -p $APP_OPTPATH/$APP_NODE_FULLNAME && \
+#cd $APP_OPTPATH/$APP_NODE_FULLNAME && \
+#$GET $APP_NODE_PACKAGEURL | tar xz --strip-components=1
+
+
 
 
 
 app_check_node_setup() {
-    if [[ ! $(type -P node) ]]; then
-        echo "[ERROR] 'node' currently not installed. Please install and try again ;)"
-        exit 1
-    fi
-    app_check_if_local_node
+  if [[ ! $(type -P node) ]]; then
+    echo "[ERROR] 'node' currently not installed. Please install and try again ;)";
+    exit 1
+  fi
+  app_check_if_local_node
 }
 
 app_check_if_local_node() {
-    export APP_CURRENT_NODE="$(type -P node)"
-    if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
-        echo "[WARN] node found, but '$APP_CURRENT_NODE' is not"
-        echo "       within apps root path '$APP_ROOTPATH'"
-    fi
+  export APP_CURRENT_NODE="$(type -P node)"
+  if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
+    echo "[WARN] node found, but '$APP_CURRENT_NODE' is not"
+    echo "       within apps root path '$APP_ROOTPATH'"
+  fi
 }
 
 ## NPM related stuff
 app_init_npm() {
-    APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
-    export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
-    export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
-    export npm_config_prefix="$APP_NPM_ROOTPATH"
-    export npm_config_globalconfig="$APP_CONFPATH/npmrc"
-    export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
-    export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
-    export npm_config_userconfig="$APP_HOMEPATH/npmrc"
-    export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
-    export npm_config_cache="$APP_NPM_ROOTPATH/cache"
-    export npm_config_tmp="$APP_TMPPATH"
-    export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
-    export PATH="$APP_NPM_BINPATH:$PATH"
+  APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
+  export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
+  export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
+  export npm_config_prefix="$APP_NPM_ROOTPATH"
+  export npm_config_globalconfig="$APP_CONFPATH/npmrc"
+  export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
+  export npm_config_userignorefile="$APP_HOMEPATH/.npmignore"
+  export npm_config_userconfig="$APP_HOMEPATH/npmrc"
+  export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
+  export npm_config_cache="$APP_NPM_ROOTPATH/cache"
+  export npm_config_tmp="$APP_TMPPATH"
+  export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
+  export PATH="$APP_NPM_BINPATH:$PATH"
 }
 
 ## NVM related stuff
 app_init_nvm() {
-    APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
-    APP_NVM_ARCHIVEURL="https://github.com/thomasfr/nvm/tarball/master"
-    APP_NVM_ADDITIONALPARAMETERS="--without-npm"
-    export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
-    export NVM_DIR="$APP_NVM_ROOTPATH"
-    export APP_NVM_BINPATH="$APP_NVM_ROOTPATH"
-    export PATH="$APP_NVM_BINPATH:$PATH"
+  APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
+  APP_NVM_ARCHIVEURL="https://github.com/thomasfr/nvm/tarball/master"
+  APP_NVM_ADDITIONALPARAMETERS="--without-npm"
+  export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
+  export NVM_DIR="$APP_NVM_ROOTPATH"
+  export APP_NVM_BINPATH="$APP_NVM_ROOTPATH"
+  export PATH="$APP_NVM_BINPATH:$PATH"
 }
 
 app_setup_nvm() {
-    if [[ ! -d $APP_NVM_ROOTPATH ]]; then
-        echo "Installing NVM locally."
-        mkdir -p $APP_NVM_ROOTPATH && cd $APP_NVM_ROOTPATH && $GET $APP_NVM_ARCHIVEURL | tar xz --strip-components=1 
-        cd $APP_BINPATH
-        ln -sf "app" "nvm"
-        cd $APP_ROOTPATH
-    fi
+  if [[ ! -d $APP_NVM_ROOTPATH ]]; then
+    echo "Installing NVM locally."
+    mkdir -p $APP_NVM_ROOTPATH \
+    && cd $APP_NVM_ROOTPATH \
+    && $GET $APP_NVM_ARCHIVEURL | tar xz --strip-components=1
+    cd $APP_BINPATH
+    ln -sf "app" "nvm"
+    cd $APP_ROOTPATH
+  fi
 
-    $APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS &> /dev/null
-    if [[ $? -eq 0 ]]; then
-        cd $APP_BINPATH
-        ln -sf "$($APP_NVM_ROOTPATH/nvm which)" "node"
-        cd $APP_ROOTPATH
-    fi
+  $APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS &> /dev/null
+  if [[ $? -eq 0 ]]; then
+    cd $APP_BINPATH
+    ln -sf "$($APP_NVM_ROOTPATH/nvm which)" "node"
+    cd $APP_ROOTPATH
+  fi
 }
 
 app_setup_npm() {
-    if [[ ! -d $APP_NPM_ROOTPATH ]]; then
-        if [[ ! $(type -P node) ]]; then
-            echo "[ERROR] 'node' currently not installed. Please install."
-            exit 1
-        fi
-        echo "Installing NPM locally."
-        mkdir -p $APP_NPM_ROOTPATH
-        $GET $APP_NPM_INSTALLSCRIPT > "$APP_NPM_ROOTPATH/install.sh"
-        chmod +x "$APP_NPM_ROOTPATH/install.sh"
-        cd $APP_NPM_ROOTPATH
-        $APP_NPM_ROOTPATH/install.sh
-        cd $APP_BINPATH
-        ln -sf "app" "npm"
-        cd $APP_ROOTPATH
+  if [[ ! -d $APP_NPM_ROOTPATH ]]; then
+    if [[ ! $(type -P node) ]]; then
+      echo "[ERROR] 'node' currently not installed. Please install."
+      exit 1
     fi
+    echo "Installing NPM locally."
+    mkdir -p $APP_NPM_ROOTPATH
+    $GET $APP_NPM_INSTALLSCRIPT > "$APP_NPM_ROOTPATH/install.sh"
+    chmod +x "$APP_NPM_ROOTPATH/install.sh"
+    cd $APP_NPM_ROOTPATH
+    $APP_NPM_ROOTPATH/install.sh
+    cd $APP_BINPATH
+    ln -sf "app" "npm"
+    cd $APP_ROOTPATH
+  fi
 }
 
 app_setup() {
-    mkdir -p \
-    $APP_TMPPATH \
-    $APP_RUNPATH \
-    $APP_LOGPATH \
-    $APP_DATAPATH \
-    $APP_OPTPATH &> /dev/null
-    if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
-        app_setup_nvm
-    fi
-    if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
-        app_setup_npm
-    fi
+  mkdir -p \
+  $APP_TMPPATH \
+  $APP_RUNPATH \
+  $APP_LOGPATH \
+  $APP_DATAPATH \
+  $APP_OPTPATH &> /dev/null
+  if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
+    app_setup_nvm
+  fi
+  if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
+    app_setup_npm
+  fi
 }
 
 app_init() {
-    if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
-        app_init_nvm
-    fi
-    
-    if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
-        app_init_npm
-    fi
-    export PATH="$APP_BINPATH:$PATH"
-		app_setup
+  if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
+    app_init_nvm
+  fi
+
+  if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
+    app_init_npm
+  fi
+  export PATH="$APP_BINPATH:$PATH"
 }
 
 app_init

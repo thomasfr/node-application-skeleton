@@ -3,9 +3,9 @@ var app = express();
 var http = require('http');
 var server = http.createServer(app);
 
-app.get('/', function(request, response) {
-    response.end("<!DOCTYPE HTML>Hello World!");
-    console.log("APP request");
+app.get('/', function (request, response) {
+  response.end("<!DOCTYPE HTML>Hello World!");
+  console.log("APP request");
 });
 
 server.listen(3000);
