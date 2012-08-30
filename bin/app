@@ -10,6 +10,11 @@ if [[ $isSymlink -gt 0 ]]; then
   ## Remove local BINPATH from the PATH if present
   export PATH="${PATH//:${APP_BINPATH}:/:}"
   COMMAND="$(basename $0)"
+  if [[ "$COMMAND" == "npm" ]]; then
+    ## if command is npm and is a symlink we change the directory to the applications
+    ## home directory. So if you call 'bin/npm' the app home gets used
+    cd $APP_HOMEPATH
+  fi
 
 ## If called script is no symlink it is called as supposed as
 ## CLI for your app. Therefore we prepend the local 'bin' dir
@@ -19,9 +24,12 @@ else
   ## occurance before i prepend it again. So it is just one time in it.
   export PATH="${PATH//:${APP_BINPATH}:/:}"
   export PATH="${APP_BINPATH}:${PATH}"
+  ## Make sure the CWD is set to the application root
+  cd $APP_ROOTPATH
   COMMAND="node $APP_LIBPATH"
 fi
 ## Call the command pass arguments and return the exit code from the called
 ## command
 $COMMAND "$@"
+cd $ORIG_CWD
 exit $?
