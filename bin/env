@@ -3,7 +3,7 @@
 ## This Environment variables can be set from outside when calling the cli
 export APP_NAME=${APP_NAME:-"Hello Skeleton"}
 export NODE_ENV=${NODE_ENV:-"development"}
-export APP_LOCAL_NODE=${APP_LOCAL_NODE:-"false"}
+export APP_LOCAL_NODE=${APP_LOCAL_NODE:-"true"}
 export APP_NODE_VERSION=${APP_NODE_VERSION:-"stable"} # stable, unstable, default or X.Y.Z
 export APP_DEFAULT_NODE_VERSION="stable"
 
@@ -178,6 +178,6 @@ app_init() {
       exit 1;
     fi
   fi
-
   cd $ORIG_CWD
+  return 0;
 }
