@@ -1,25 +1,27 @@
 #!/bin/bash
 source "$(cd $(dirname $0);pwd -P)/env"
-echo $APP_HOSTSYSTEM
-hasSymlinks=$(file -h $0 | grep -ic "symbolic link to")
-if [[ $hasSymlinks -gt 0 ]]; then
-    COMMAND=$(basename $0)
+app_init
+
+isSymlink=$(file -h $0 | grep -ic "symbolic link to")
+## If called script is a symlink, we use the name of the symlink
+## as command. DO NOT ADD LOCAL BIN TO PATH. Otherwise you will get
+## infinite loop
+if [[ $isSymlink -gt 0 ]]; then
+  ## Remove local BINPATH from the PATH if present
+  export PATH="${PATH//:${APP_BINPATH}:/:}"
+  COMMAND="$(basename $0)"
+
+## If called script is no symlink it is called as supposed as
+## CLI for your app. Therefore we prepend the local 'bin' dir
+## to PATH.
 else
-    COMMAND="node"
+  ## Because of the subshelling to itself recursively i try to remove every
+  ## occurance before i prepend it again. So it is just one time in it.
+  export PATH="${PATH//:${APP_BINPATH}:/:}"
+  export PATH="${APP_BINPATH}:${PATH}"
+  COMMAND="node $APP_LIBPATH"
 fi
-case $COMMAND in
-    "node" )
-        app_check_node_setup
-        node $APP_LIBPATH "$@"
-        exit $?
-    ;;
-    "npm" )
-        app_check_node_setup
-        $APP_NPM_BINPATH/npm "$@"
-        exit $?
-    ;;
-    "nvm" )
-        $APP_NVM_BINPATH/nvm "$@"
-        exit $?
-    ;;
-esac
+## Call the command pass arguments and return the exit code from the called
+## command
+$COMMAND "$@"
+exit $?

@@ -1,80 +1,83 @@
 #!/bin/bash
 
+## This Environment variables can be set from outside when calling the cli
 export APP_NAME=${APP_NAME:-"Hello Skeleton"}
 export NODE_ENV=${NODE_ENV:-"development"}
-export APP_NODE_ALIAS=${APP_NODE_ALIAS:-"current"}
-export APP_USE_LOCAL_NVM=${APP_USE_LOCAL_NVM:-"false"}
-export APP_USE_LOCAL_NPM=${APP_USE_LOCAL_NPM:-"false"}
+export APP_LOCAL_NODE=${APP_LOCAL_NODE:-"false"}
+export APP_NODE_VERSION=${APP_NODE_VERSION:-"stable"} # stable, unstable, default or X.Y.Z
+export APP_DEFAULT_NODE_VERSION="stable"
 
-## Get the absolute directory regardless from where you are calling the script.
+## Get the absolute canonical directory regardless from where you are calling the script.
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure
-## that the correct path gets used.
+## that always the absolute and correct path gets used.
 export APP_ROOTPATH="$(cd $(dirname $(cd $(dirname $0);pwd -P));pwd -P)"
 export APP_CONFPATH="$APP_ROOTPATH/config"
 export APP_CONFFILE="$APP_CONFPATH/app.json"
 export APP_VARPATH="$APP_ROOTPATH/var"
+export APP_BINPATH="$APP_ROOTPATH/bin"
+export APP_HOMEPATH="$APP_ROOTPATH/app"
 export APP_RUNPATH="$APP_VARPATH/run"
 export APP_OPTPATH="$APP_VARPATH/opt"
 export APP_TMPPATH="$APP_VARPATH/tmp"
 export APP_LOGPATH="$APP_VARPATH/log"
 export APP_DATAPATH="$APP_VARPATH/data"
 export APP_LIBPATH="$APP_VARPATH/lib"
-export APP_BINPATH="$APP_ROOTPATH/bin"
-export APP_HOMEPATH="$APP_ROOTPATH/app"
+
+################################################################################
+
+## This is needed to restore the original - the users Current working dir
+## Because we are changing directories.
+ORIG_CWD="$(pwd)"
+APP_DOWNLOAD_HOST="http://nodejs.org/dist"
+
+# lowercase the system name 'linux' 'darwin'
+APP_HOST_SYSTEM="$(uname -s | tr ['A-Z'] ['a-z'])"
+# 'x86_64' or 'x86'
+APP_HOST_MACHINE="$(uname -m)"
+
+# TODO: Implement cases for Solaris where output is something else
+if [[ "$APP_HOST_MACHINE" == 'x86_64' ]]; then
+  APP_HOST_BITNESS="x64"
+else
+  APP_HOST_BITNESS="x86"
+fi
 
 ## Thanks to https://github.com/visionmedia/n/blob/master/bin/n#L35-45
-GET=
-
 # wget support (Added --no-check-certificate for Github downloads)
-which wget > /dev/null && GET="wget --no-check-certificate -q -O-"
+type -p wget > /dev/null && GET="wget --no-check-certificate -q -O-"
+# curl support (Added --insecure for Github downloads)
+type -p curl > /dev/null && GET="curl --insecure -# -sSL"
 
-# curl support
-which curl > /dev/null && GET="curl --insecure -# -sSL"
-
-
-# node-v0.8.8-darwin-x64.tar.gz
-APP_HOSTSYSTEM="$(uname -s | tr ['A-Z'] ['a-z'])"
-APP_HOSTMACHINE="$(uname -m)"
-if [[ "$APP_HOSTMACHINE" == 'x86_64' ]]; then
-  APP_HOSTBITNESS="x86"
-else
-  APP_HOSTBITNESS="x64"
+if [[ -z $GET ]]; then
+  echo "Need 'curl' or 'wget'. Install one of these and try again. Sorry."
+  exit 1;
 fi
-APP_NODEVERSION="v0.8.8"
 
-APP_NODE_FULLNAME="node-${APP_NODEVERSION}-${APP_HOSTSYSTEM}-${APP_HOSTBITNESS}"
-APP_NODE_PACKAGENAME="${APP_NODE_FULLNAME}.tar.gz"
-APP_NODE_PACKAGEURL="http://nodejs.org/dist/${APP_NODEVERSION}/$APP_NODE_PACKAGENAME"
+################################################################################
 
-#mkdir -p $APP_OPTPATH/$APP_NODE_FULLNAME && \
-#cd $APP_OPTPATH/$APP_NODE_FULLNAME && \
-#$GET $APP_NODE_PACKAGEURL | tar xz --strip-components=1
-
-
-
-
-
-app_check_node_setup() {
-  if [[ ! $(type -P node) ]]; then
-    echo "[ERROR] 'node' currently not installed. Please install and try again ;)";
-    exit 1
-  fi
-  app_check_if_local_node
+app_get_latest_stable_node_version() {
+  $GET http://nodejs.org/dist/ \
+  | egrep -o '[0-9]+\.[0-9]*[02468]\.[0-9]+' \
+  | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
+  | tail -n1
 }
 
-app_check_if_local_node() {
-  export APP_CURRENT_NODE="$(type -P node)"
-  if [[ "${APP_CURRENT_NODE##$APP_ROOTPATH}" = "$APP_CURRENT_NODE" ]]; then
-    echo "[WARN] node found, but '$APP_CURRENT_NODE' is not"
-    echo "       within apps root path '$APP_ROOTPATH'"
-  fi
+app_get_latest_unstable_node_version() {
+ $GET http://nodejs.org/dist/ \
+ | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+ | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
+ | tail -n1
 }
 
 ## NPM related stuff
-app_init_npm() {
-  APP_NPM_INSTALLSCRIPT="https://npmjs.org/install.sh"
-  export APP_NPM_ROOTPATH="$APP_OPTPATH/npm"
+app_init_node() {
+  export APP_NPM_ROOTPATH="$APP_OPTPATH/node"
   export APP_NPM_BINPATH="$APP_NPM_ROOTPATH/bin"
+
+  export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
+  export PATH="${PATH//:${APP_NPM_BINPATH}:/:}"
+  export PATH="$APP_NPM_BINPATH:$PATH"
+
   export npm_config_prefix="$APP_NPM_ROOTPATH"
   export npm_config_globalconfig="$APP_CONFPATH/npmrc"
   export npm_config_globalignorefile="$APP_CONFPATH/npmignore"
@@ -83,85 +86,98 @@ app_init_npm() {
   export npm_config_init_module="$APP_HOMEPATH/npm-init.js"
   export npm_config_cache="$APP_NPM_ROOTPATH/cache"
   export npm_config_tmp="$APP_TMPPATH"
-  export NODE_PATH="$APP_NPM_ROOTPATH/lib/node_modules"
-  export PATH="$APP_NPM_BINPATH:$PATH"
+
+  local identifier="$(app_get_node_identifier $APP_NODE_VERSION)"
+    cd "${APP_OPTPATH}" \
+    && ln -sf "${identifier}" "node"  &> /dev/null
+    cd "${APP_BINPATH}" \
+    && ln -sf "app" "node" \
+    && ln -sf "app" "npm" &> /dev/null
 }
 
-## NVM related stuff
-app_init_nvm() {
-  APP_NVM_GITURL="https://github.com/thomasfr/nvm.git"
-  APP_NVM_ARCHIVEURL="https://github.com/thomasfr/nvm/tarball/master"
-  APP_NVM_ADDITIONALPARAMETERS="--without-npm"
-  export APP_NVM_ROOTPATH="$APP_OPTPATH/nvm"
-  export NVM_DIR="$APP_NVM_ROOTPATH"
-  export APP_NVM_BINPATH="$APP_NVM_ROOTPATH"
-  export PATH="$APP_NVM_BINPATH:$PATH"
-}
-
-app_setup_nvm() {
-  if [[ ! -d $APP_NVM_ROOTPATH ]]; then
-    echo "Installing NVM locally."
-    mkdir -p $APP_NVM_ROOTPATH \
-    && cd $APP_NVM_ROOTPATH \
-    && $GET $APP_NVM_ARCHIVEURL | tar xz --strip-components=1
-    cd $APP_BINPATH
-    ln -sf "app" "nvm"
-    cd $APP_ROOTPATH
-  fi
-
-  $APP_NVM_ROOTPATH/nvm which $APP_NODE_ALIAS &> /dev/null
-  if [[ $? -eq 0 ]]; then
-    cd $APP_BINPATH
-    ln -sf "$($APP_NVM_ROOTPATH/nvm which)" "node"
-    cd $APP_ROOTPATH
+app_get_installed_node_version() {
+  if [[ -f "$APP_OPTPATH/.node_version" && -r "$APP_OPTPATH/.node_version" ]]; then
+    echo "$(cat $APP_OPTPATH/.node_version)"
+  else
+    echo ""
   fi
 }
 
-app_setup_npm() {
-  if [[ ! -d $APP_NPM_ROOTPATH ]]; then
-    if [[ ! $(type -P node) ]]; then
-      echo "[ERROR] 'node' currently not installed. Please install."
-      exit 1
-    fi
-    echo "Installing NPM locally."
-    mkdir -p $APP_NPM_ROOTPATH
-    $GET $APP_NPM_INSTALLSCRIPT > "$APP_NPM_ROOTPATH/install.sh"
-    chmod +x "$APP_NPM_ROOTPATH/install.sh"
-    cd $APP_NPM_ROOTPATH
-    $APP_NPM_ROOTPATH/install.sh
-    cd $APP_BINPATH
-    ln -sf "app" "npm"
-    cd $APP_ROOTPATH
+app_get_node_version() {
+  local version="${1:-$APP_DEFAULT_NODE_VERSION}"
+  if [[ "$version" == "stable" ]]; then
+    version="$(app_get_latest_stable_node_version)";
+  elif [[ "$version" == "unstable" ]]; then
+    version="$(app_get_latest_unstable_node_version)";
+  elif [[ "$version" == "default" ]]; then
+    version="$(app_get_node_version $APP_DEFAULT_NODE_VERSION)";
+  else
+    version="$version"
+  fi
+  ## Check if version is semantically correct
+  version="$(echo $version | egrep -oE '^[0-9]+\.[0-9]+\.[0-9]+$')"
+  ## if it does not match we try to get the 'default' version
+  if [[ -z "$version" ]]; then
+    version="$(app_get_node_version $APP_DEFAULT_NODE_VERSION)"
+  fi
+  echo "$version"
+}
+
+app_get_node_identifier() {
+  local version="v$1"
+  local system="$APP_HOST_SYSTEM"
+  local bitness="$APP_HOST_BITNESS"
+  local identifier="node-${version}-${system}-${bitness}"
+  echo $identifier
+}
+
+app_install_node() {
+  local version="$1"
+  local identifier="$(app_get_node_identifier $version)"
+  local packagename="${identifier}.tar.gz"
+  local downloadUrl="${APP_DOWNLOAD_HOST}/v${version}/${packagename}"
+  mkdir -p "${APP_OPTPATH}/${identifier}" \
+  && cd "${APP_OPTPATH}/${identifier}" \
+  && $GET "${downloadUrl}" | tar xz --strip-components=1 &> /dev/null
+  echo "$version" > $APP_OPTPATH/.node_version
+  return 0;
+}
+
+app_local_node_installed() {
+  local localInstalled="$(app_get_installed_node_version)"
+  local identifier="$(app_get_node_identifier $localInstalled)"
+  if [[ -r "$APP_OPTPATH/$identifier" && -d "$APP_OPTPATH/$identifier" ]]; then
+    echo "true";
+  else
+    echo "false";
   fi
 }
 
-app_setup() {
+app_init() {
   mkdir -p \
   $APP_TMPPATH \
   $APP_RUNPATH \
   $APP_LOGPATH \
   $APP_DATAPATH \
   $APP_OPTPATH &> /dev/null
-  if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
-    app_setup_nvm
+  if [[ "x$APP_LOCAL_NODE" == "xtrue" ]]; then
+    if [[ "x$(app_local_node_installed)" == "xfalse" ]]; then
+      export APP_NODE_VERSION="$(app_get_node_version $APP_NODE_VERSION)"
+      echo "Installing node v$APP_NODE_VERSION."
+      app_install_node $APP_NODE_VERSION;
+      if [[ $? -gt 0 ]]; then
+        echo "[ERROR] Error installing node v$APP_NODE_VERSION.";
+        exit 1;
+      fi
+    fi
+    export APP_NODE_VERSION="$(app_get_installed_node_version)"
+    app_init_node
+  else
+    if [[ ! $(type -P node) ]]; then
+      echo "[ERROR] node was not found on PATH. Please install it and try again.";
+      exit 1;
+    fi
   fi
-  if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
-    app_setup_npm
-  fi
+
+  cd $ORIG_CWD
 }
-
-app_init() {
-  if [[ "x$APP_USE_LOCAL_NVM" == "xtrue" ]]; then
-    app_init_nvm
-  fi
-
-  if [[ "x$APP_USE_LOCAL_NPM" == "xtrue" ]]; then
-    app_init_npm
-  fi
-  export PATH="$APP_BINPATH:$PATH"
-}
-
-app_init
-
-
-
