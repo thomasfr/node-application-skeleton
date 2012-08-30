@@ -1,4 +1,6 @@
 var underscore = require('underscore');
+var simpleReplace = require('simple-replace')
+var fs = require('fs')
 var commandName = process.argv[2];
 var appConfig = {};
 
@@ -8,27 +10,30 @@ if (!commandName) {
   process.exit(1);
 }
 
-// If Config file is not there yet we just ignore it for the moment
-// This should only be the case when 'configure' command did not produced
-// a valid json config file in 'APP_CONFFILE'
-try {
-  appConfig = require(process.env['APP_CONFFILE']) || {};
-} catch (e) {
-  console.log("No config file found '" + process.env['APP_CONFFILE'] + "'");
+var getApplicationConfig = function (configHash) {
+  var confFilePath = process.env['APP_CONFFILE']
+  var fileContents = fs.readFileSync(confFilePath, 'utf8')
+  var fileOutput = simpleReplace(fileContents, configHash)
+  try {
+    var appConfig = JSON.parse(fileOutput)
+  } catch (e) {}
+  return appConfig
 }
 
-var commandsDir = __dirname + '/commands/';
-var config = underscore.extend(appConfig, process.env);
-var args = process.argv.slice(3) || [];
+var appConfig = getApplicationConfig(process.env)
+var commandsDir = __dirname + '/commands'
+var config = underscore.extend(appConfig, process.env)
+var args = process.argv.slice(3) || []
 
-// if(commandName !== 'configure') {
-//     require(commandsDir + 'skeleton-command-configure.js')(config, args);
-// }
-var commandFile = 'skeleton-command-' + commandName;
+if (commandName !== 'configure') {
+  var configureCommand = require(commandsDir + '/' + 'configure')
+  configureCommand(config, args)
+}
+
 try {
-  var command = require(commandsDir + commandFile + '.js');
+  var command = require(commandsDir + '/' + commandName)
 } catch (e) {
-  console.error("Command '" + commandName + "' not found or failed to load.");
-  throw new Error(e.getMessage());
+  console.error("Command '" + commandName + "' not found or failed to load.")
+  throw new Error(e.getMessage())
 }
 command(config, args);
