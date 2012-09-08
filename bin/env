@@ -4,7 +4,7 @@
 export APP_NAME=${APP_NAME:-"Hello Skeleton"}
 export NODE_ENV=${NODE_ENV:-"development"}
 export APP_LOCAL_NODE=${APP_LOCAL_NODE:-"true"}
-export APP_NODE_VERSION=${APP_NODE_VERSION:-"stable"} # stable, unstable, default or X.Y.Z
+export APP_NODE_VERSION=${APP_NODE_VERSION:-"unstable"} # stable, unstable, default or X.Y.Z
 export APP_DEFAULT_NODE_VERSION="stable"
 
 ## Get the absolute canonical directory regardless from where you are calling the script.
@@ -30,17 +30,22 @@ export APP_LIBPATH="$APP_VARPATH/lib"
 ORIG_CWD="$(pwd)"
 APP_DOWNLOAD_HOST="http://nodejs.org/dist"
 
-# lowercase the system name 'linux' 'darwin'
+# lowercase the system name 'linux' 'darwin' 'sunos'
 APP_HOST_SYSTEM="$(uname -s | tr ['A-Z'] ['a-z'])"
-# 'x86_64' or 'x86'
-APP_HOST_MACHINE="$(uname -m)"
-
-# TODO: Implement cases for Solaris where output is something else
-if [[ "$APP_HOST_MACHINE" == 'x86_64' ]]; then
-  APP_HOST_BITNESS="x64"
+if [[ "$APP_HOST_SYSTEM" == "sunos" ]]; then
+  if [[ "$(isainfo -b)" == '64' ]]; then
+    APP_HOST_BITNESS="x64"
+  else
+    APP_HOST_BITNESS="x86"
+  fi
 else
-  APP_HOST_BITNESS="x86"
+  if [[ "$(uname -m)" == 'x86_64' ]]; then
+    APP_HOST_BITNESS="x64"
+  else
+    APP_HOST_BITNESS="x86"
+  fi
 fi
+
 
 ## Thanks to https://github.com/visionmedia/n/blob/master/bin/n#L35-45
 # wget support (Added --no-check-certificate for Github downloads)
@@ -57,14 +62,14 @@ fi
 
 app_get_latest_stable_node_version() {
   $GET http://nodejs.org/dist/ \
-  | egrep -o '[0-9]+\.[0-9]*[02468]\.[0-9]+' \
+  | sed -n -E "s/.*([0-9]+\.[0-9]*[02468]\.[0-9]+).*/\1/gp" \
   | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
   | tail -n1
 }
 
 app_get_latest_unstable_node_version() {
  $GET http://nodejs.org/dist/ \
- | egrep -o '[0-9]+\.[0-9]+\.[0-9]+' \
+ | sed -n -E "s/.*([0-9]+\.[0-9]+\.[0-9]+).*/\1/gp" \
  | sort -u -k 1,1n -k 2,2n -k 3,3n -t . \
  | tail -n1
 }
@@ -88,11 +93,23 @@ app_init_node() {
   export npm_config_tmp="$APP_TMPPATH"
 
   local identifier="$(app_get_node_identifier $APP_NODE_VERSION)"
+  if [[ -h "${APP_OPTPATH}/node" ]]; then
+    rm "${APP_OPTPATH}/node"
+  fi
+  if [[ ! -e "${APP_OPTPATH}/node" ]]; then
     cd "${APP_OPTPATH}" \
-    && ln -sf "${identifier}" "node"  &> /dev/null
+    && ln -s "${identifier}" "node" >/dev/null 2>&1
+  fi
+
+  if [[ ! -e "${APP_BINPATH}/node" ]]; then
     cd "${APP_BINPATH}" \
-    && ln -sf "app" "node" \
-    && ln -sf "app" "npm" &> /dev/null
+    && ln -s "app" "node" >/dev/null 2>&1
+  fi
+  if [[ ! -e "${APP_BINPATH}/npm" ]]; then
+    cd "${APP_BINPATH}" \
+    && ln -s "app" "npm" >/dev/null 2>&1
+  fi
+  cd "$ORIG_CWD"
 }
 
 app_get_installed_node_version() {
@@ -115,7 +132,7 @@ app_get_node_version() {
     version="$version"
   fi
   ## Check if version is semantically correct
-  version="$(echo $version | egrep -oE '^[0-9]+\.[0-9]+\.[0-9]+$')"
+  version="$(echo $version | sed -n -E 's/^([0-9]+\.[0-9]+\.[0-9]+)$/\1/gp')"
   ## if it does not match we try to get the 'default' version
   if [[ -z "$version" ]]; then
     version="$(app_get_node_version $APP_DEFAULT_NODE_VERSION)"
@@ -136,9 +153,9 @@ app_install_node() {
   local identifier="$(app_get_node_identifier $version)"
   local packagename="${identifier}.tar.gz"
   local downloadUrl="${APP_DOWNLOAD_HOST}/v${version}/${packagename}"
-  mkdir -p "${APP_OPTPATH}/${identifier}" \
-  && cd "${APP_OPTPATH}/${identifier}" \
-  && $GET "${downloadUrl}" | tar xz --strip-components=1 &> /dev/null
+  $GET "${downloadUrl}" > $APP_TMPPATH/$packagename \
+  && cd $APP_OPTPATH \
+  && tar xzf $APP_TMPPATH/$packagename &> /dev/null
   echo "$version" > $APP_OPTPATH/.node_version
   return 0;
 }
@@ -178,6 +195,6 @@ app_init() {
       exit 1;
     fi
   fi
-  cd $ORIG_CWD
+  cd "$ORIG_CWD"
   return 0;
 }
