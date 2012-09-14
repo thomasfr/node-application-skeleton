@@ -9,3 +9,4 @@ bin/*
 !bin/env
 npm-debug.log
 TODO
+node_modules

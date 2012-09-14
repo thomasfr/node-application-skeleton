@@ -4,8 +4,8 @@
 export APP_NAME=${APP_NAME:-"Hello Skeleton"}
 export NODE_ENV=${NODE_ENV:-"development"}
 export APP_LOCAL_NODE=${APP_LOCAL_NODE:-"true"}
-export APP_NODE_VERSION=${APP_NODE_VERSION:-"unstable"} # stable, unstable, default or X.Y.Z
 export APP_DEFAULT_NODE_VERSION="stable"
+export APP_NODE_VERSION=${APP_NODE_VERSION:-"$APP_DEFAULT_NODE_VERSION"} # stable, unstable, default or X.Y.Z
 
 ## Get the absolute canonical directory regardless from where you are calling the script.
 ## Make sure to prepend $APP_ROOTPATH whenever you can so you are absolutly sure
